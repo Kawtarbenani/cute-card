@@ -104,13 +104,13 @@
         
         .buttons-container {
             position: relative;
-            margin: 20px 0 40px 0;
-            min-height: 150px;
+            margin: 20px 0 60px 0; /* Plus d'espace en bas pour le Non */
+            min-height: 180px;
             z-index: 10;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 25px;
+            gap: 20px;
         }
         
         .oui-btn {
@@ -130,11 +130,24 @@
             align-items: center;
             gap: 15px;
             order: 1;
+            margin-bottom: 30px; /* Espace pour le Non en dessous */
         }
         
         .oui-btn:hover {
             transform: scale(1.08);
             box-shadow: 0 15px 30px rgba(76, 217, 100, 0.6);
+        }
+        
+        /* Conteneur pour le bouton Non (pour le positionner initialement) */
+        .non-container {
+            position: relative;
+            width: 100%;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+            order: 2;
         }
         
         .non-btn {
@@ -146,18 +159,16 @@
             border-radius: 60px;
             cursor: pointer;
             box-shadow: 0 8px 20px rgba(255, 92, 141, 0.4);
-            position: fixed; /* FIXED pour bouger partout */
-            z-index: 100;
+            position: relative; /* Position relative pour commencer */
+            z-index: 20;
             font-weight: 800;
             display: flex;
             align-items: center;
             gap: 10px;
             transition: none !important;
             animation: none !important;
-            /* Position initiale */
-            top: 60%;
-            left: 50%;
-            transform: translate(-50%, 0);
+            /* Position initiale DANS le conteneur (en dessous de Oui) */
+            margin-top: 10px;
         }
         
         .non-btn .shy-text {
@@ -333,9 +344,18 @@
             </div>
             
             <div class="buttons-container">
+                <!-- OUI est AU-DESSUS -->
                 <button class="oui-btn" id="ouiBtn">
                     <i class="fas fa-heart"></i> OUI !
                 </button>
+                
+                <!-- Conteneur pour NON qui sera EN DESSOUS -->
+                <div class="non-container">
+                    <button class="non-btn" id="nonBtn">
+                        <i class="fas fa-grin-tongue-squint"></i> Non 
+                        <span class="shy-text">(shy 😈)</span>
+                    </button>
+                </div>
             </div>
             
             <div class="message" id="message"></div>
@@ -345,12 +365,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Le bouton NON - bouge PARTOUT sur la page -->
-    <button class="non-btn" id="nonBtn">
-        <i class="fas fa-grin-tongue-squint"></i> Non 
-        <span class="shy-text">(shy 😈)</span>
-    </button>
 
     <!-- Add some extra space at bottom for scrolling -->
     <div style="height: 200px; width: 100%;"></div>
@@ -366,44 +380,40 @@
             
             let lastMoveTime = 0;
             let isCelebrating = false;
+            let isNonFixed = false; // Pour suivre si Non est en position fixed
             
-            // Position initiale du bouton Non (n'importe où sur la page)
-            function positionNonButtonRandomly() {
-                // Position aléatoire sur TOUTE la page
-                const viewportWidth = window.innerWidth;
-                const viewportHeight = window.innerHeight;
+            // Position initiale - Non est BIEN EN DESSOUS de Oui
+            function positionNonButtonInitially() {
+                // S'assurer que Non est EN DESSOUS de Oui
+                const ouiBtnRect = ouiBtn.getBoundingClientRect();
+                const nonContainer = document.querySelector('.non-container');
+                const nonContainerRect = nonContainer.getBoundingClientRect();
                 
-                // Calculer la hauteur totale du document pour le scroll
-                const docHeight = Math.max(
-                    document.body.scrollHeight,
-                    document.documentElement.scrollHeight,
-                    document.body.offsetHeight,
-                    document.documentElement.offsetHeight,
-                    document.body.clientHeight,
-                    document.documentElement.clientHeight
-                );
+                // Calculer la position pour que Non soit 80px en dessous de Oui
+                const targetTop = ouiBtnRect.bottom + 80;
                 
-                // Position aléatoire (dans le viewport initial)
-                const randomX = Math.random() * (viewportWidth - nonBtn.offsetWidth - 80) + 40;
-                const randomY = Math.random() * (viewportHeight - nonBtn.offsetHeight - 80) + 40;
+                // Ajuster la position du conteneur
+                nonContainer.style.marginTop = `${targetTop - nonContainerRect.top}px`;
                 
-                nonBtn.style.position = 'fixed';
-                nonBtn.style.left = `${randomX}px`;
-                nonBtn.style.top = `${randomY}px`;
+                // Positionner le bouton Non dans son conteneur
+                nonBtn.style.position = 'relative';
+                nonBtn.style.left = '0';
+                nonBtn.style.top = '0';
                 nonBtn.style.transform = 'none';
                 
-                console.log('Non button placed randomly on page');
+                console.log('Non button positioned BELOW Oui');
+                isNonFixed = false;
             }
             
-            // Position initiale aléatoire
-            setTimeout(positionNonButtonRandomly, 100);
+            // Position initiale
+            setTimeout(positionNonButtonInitially, 100);
             
             // Faire bouger le bouton Non PARTOUT quand la souris s'approche
             document.addEventListener('mousemove', function(event) {
                 if (isCelebrating) return;
                 
                 const now = Date.now();
-                if (now - lastMoveTime < 70) return; // Encore plus rapide!
+                if (now - lastMoveTime < 70) return;
                 
                 const btnRect = nonBtn.getBoundingClientRect();
                 const btnCenterX = btnRect.left + btnRect.width / 2;
@@ -418,18 +428,25 @@
                 if (distance < 90) {
                     lastMoveTime = now;
                     
+                    // Passer en position FIXED pour bouger partout
+                    if (!isNonFixed) {
+                        nonBtn.style.position = 'fixed';
+                        nonBtn.style.zIndex = '100';
+                        isNonFixed = true;
+                    }
+                    
                     // Calculer la direction d'échappement
                     const angle = Math.atan2(btnCenterY - event.clientY, btnCenterX - event.clientX);
                     
-                    // Distance d'échappement aléatoire - peut aller TRÈS loin!
-                    const escapeDistance = 150 + Math.random() * 250;
+                    // Distance d'échappement aléatoire
+                    const escapeDistance = 120 + Math.random() * 180;
                     
                     // Nouvelle position - N'IMPORTE OÙ sur la page!
                     let newX = btnCenterX + Math.cos(angle) * escapeDistance;
                     let newY = btnCenterY + Math.sin(angle) * escapeDistance;
                     
-                    // Garder dans les limites de la fenêtre avec marge
-                    const padding = 50;
+                    // Garder dans les limites de la fenêtre
+                    const padding = 40;
                     newX = Math.max(padding, Math.min(newX, window.innerWidth - nonBtn.offsetWidth - padding));
                     newY = Math.max(padding, Math.min(newY, window.innerHeight - nonBtn.offsetHeight - padding));
                     
@@ -448,9 +465,7 @@
                             "Essaie encore! 💨",
                             "Presque! 🙈",
                             "Impossible à attraper! 🚀",
-                            "Il court partout! 🌪️",
-                            "Fuis! Fuis! 🏃‍♂️💨",
-                            "Bonne chance! 😂"
+                            "Il court partout! 🌪️"
                         ];
                         message.textContent = messages[Math.floor(Math.random() * messages.length)];
                         message.style.display = 'block';
@@ -468,12 +483,12 @@
                         nonBtn.style.boxShadow = '0 8px 20px rgba(255, 92, 141, 0.4)';
                     }, 100);
                     
-                    // Téléportation COMPLÈTE parfois!
+                    // Téléportation parfois
                     if (Math.random() > 0.8) {
                         setTimeout(() => {
-                            // Téléporte à un endroit RANDOM sur TOUTE la page!
-                            const randomX = Math.random() * (window.innerWidth - nonBtn.offsetWidth - 100) + 50;
-                            const randomY = Math.random() * (window.innerHeight - nonBtn.offsetHeight - 100) + 50;
+                            // Position aléatoire
+                            const randomX = Math.random() * (window.innerWidth - nonBtn.offsetWidth - 80) + 40;
+                            const randomY = Math.random() * (window.innerHeight - nonBtn.offsetHeight - 80) + 40;
                             
                             nonBtn.style.left = `${randomX}px`;
                             nonBtn.style.top = `${randomY}px`;
@@ -505,14 +520,8 @@
                     
                     // Effet de scale
                     if (Math.random() > 0.4) {
-                        const scale = 0.6 + Math.random() * 0.5;
+                        const scale = 0.7 + Math.random() * 0.4;
                         nonBtn.style.transform = `scale(${scale})`;
-                    }
-                    
-                    // Rotation folle parfois
-                    if (Math.random() > 0.7) {
-                        const rotate = Math.random() * 90 - 45;
-                        nonBtn.style.transform += ` rotate(${rotate}deg)`;
                     }
                 }
             });
@@ -533,8 +542,8 @@
                 event.preventDefault();
                 
                 const fakeEvent = new MouseEvent('mousemove', {
-                    clientX: event.clientX + 250,
-                    clientY: event.clientY + 250
+                    clientX: event.clientX + 200,
+                    clientY: event.clientY + 200
                 });
                 document.dispatchEvent(fakeEvent);
                 
@@ -542,9 +551,9 @@
                 message.style.display = 'block';
                 
                 // Effet de saut
-                nonBtn.style.transform += ' translateY(-30px)';
+                nonBtn.style.transform += ' translateY(-25px)';
                 setTimeout(() => {
-                    nonBtn.style.transform = nonBtn.style.transform.replace('translateY(-30px)', '');
+                    nonBtn.style.transform = nonBtn.style.transform.replace('translateY(-25px)', '');
                 }, 200);
             });
             
@@ -555,7 +564,7 @@
                 // Retirer les écouteurs d'événements
                 document.removeEventListener('mousemove', arguments.callee);
                 
-                // Cacher le bouton OUI et message
+                // Cacher les boutons et message
                 ouiBtn.style.display = 'none';
                 nonBtn.style.display = 'none';
                 message.style.display = 'none';
@@ -571,14 +580,14 @@
                     // Afficher la célébration
                     celebrationContainer.style.display = 'block';
                     
-                    // Créer des confettis MASSIFS
-                    for (let i = 0; i < 150; i++) {
+                    // Créer des confettis
+                    for (let i = 0; i < 120; i++) {
                         setTimeout(() => {
                             createConfetti();
-                        }, i * 8);
+                        }, i * 10);
                     }
                     
-                    // Changer le background en mode fête
+                    // Changer le background
                     document.body.style.background = 'linear-gradient(135deg, #ff9ec0 0%, #a29bfe 33%, #74b9ff 66%, #ffd166 100%)';
                     document.body.style.animation = 'rainbowBG 10s infinite linear';
                     
@@ -591,52 +600,16 @@
                         }
                     `;
                     document.head.appendChild(style);
-                    
-                    // Effets étincelles supplémentaires
-                    for (let i = 0; i < 40; i++) {
-                        setTimeout(() => {
-                            createSparkle();
-                        }, i * 120);
-                    }
-                    
-                    // Message final flottant
-                    setTimeout(() => {
-                        const finalMessage = document.createElement('div');
-                        finalMessage.innerHTML = '✨🎉💖 YAY! ✨🎉💖';
-                        finalMessage.style.position = 'fixed';
-                        finalMessage.style.top = '20%';
-                        finalMessage.style.left = '50%';
-                        finalMessage.style.transform = 'translate(-50%, -50%)';
-                        finalMessage.style.fontSize = '2.5rem';
-                        finalMessage.style.zIndex = '1002';
-                        finalMessage.style.opacity = '0';
-                        finalMessage.style.textAlign = 'center';
-                        finalMessage.style.fontWeight = '900';
-                        finalMessage.style.color = '#ff006e';
-                        finalMessage.style.textShadow = '3px 3px 0 #ffafcc';
-                        document.body.appendChild(finalMessage);
-                        
-                        finalMessage.animate([
-                            { opacity: 0, transform: 'translate(-50%, -50%) scale(0.5)' },
-                            { opacity: 1, transform: 'translate(-50%, -50%) scale(1.2)' },
-                            { opacity: 1, transform: 'translate(-50%, -50%) scale(1)' }
-                        ], {
-                            duration: 800,
-                            easing: 'ease-out'
-                        });
-                        
-                        setTimeout(() => finalMessage.remove(), 4000);
-                    }, 800);
                 }, 500);
             });
             
             // Créer des confettis
             function createConfetti() {
                 const confetti = document.createElement('div');
-                const emojis = ['🎉', '✨', '🎊', '🥳', '💖', '🌟', '😊', '💕', '🎈', '🌸', '🦄', '🌈', '🎇', '🎆'];
+                const emojis = ['🎉', '✨', '🎊', '🥳', '💖', '🌟', '😊', '💕'];
                 confetti.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
                 confetti.style.position = 'fixed';
-                confetti.style.fontSize = (Math.random() * 35 + 15) + 'px';
+                confetti.style.fontSize = (Math.random() * 30 + 15) + 'px';
                 confetti.style.left = Math.random() * 100 + 'vw';
                 confetti.style.top = '-50px';
                 confetti.style.zIndex = '1000';
@@ -644,12 +617,12 @@
                 
                 document.body.appendChild(confetti);
                 
-                const duration = Math.random() * 2000 + 1000;
-                const endX = (Math.random() * 400 - 200) + 'px';
+                const duration = Math.random() * 1500 + 800;
+                const endX = (Math.random() * 300 - 150) + 'px';
                 
                 confetti.animate([
                     { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
-                    { transform: `translateY(${window.innerHeight + 100}px) translateX(${endX}) rotate(${Math.random() * 1440}deg)`, opacity: 0 }
+                    { transform: `translateY(${window.innerHeight + 100}px) translateX(${endX}) rotate(${Math.random() * 720}deg)`, opacity: 0 }
                 ], {
                     duration: duration,
                     easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)'
@@ -658,46 +631,16 @@
                 setTimeout(() => confetti.remove(), duration);
             }
             
-            // Créer des étincelles
-            function createSparkle() {
-                const sparkle = document.createElement('div');
-                sparkle.innerHTML = '✨';
-                sparkle.style.position = 'fixed';
-                sparkle.style.fontSize = (Math.random() * 50 + 20) + 'px';
-                sparkle.style.left = Math.random() * 100 + 'vw';
-                sparkle.style.top = Math.random() * 100 + 'vh';
-                sparkle.style.zIndex = '1001';
-                sparkle.style.opacity = '0';
-                
-                document.body.appendChild(sparkle);
-                
-                sparkle.animate([
-                    { transform: 'scale(0) rotate(0deg)', opacity: 0 },
-                    { transform: 'scale(2) rotate(180deg)', opacity: 0.9 },
-                    { transform: 'scale(0) rotate(360deg)', opacity: 0 }
-                ], {
-                    duration: 1500,
-                    easing: 'ease-out'
-                });
-                
-                setTimeout(() => sparkle.remove(), 1500);
-            }
-            
             // Gérer le redimensionnement de la fenêtre
             window.addEventListener('resize', function() {
-                if (!isCelebrating) {
-                    const btnRect = nonBtn.getBoundingClientRect();
-                    
-                    // Si le bouton est hors de l'écran, le repositionner aléatoirement
-                    if (btnRect.left < 0 || btnRect.top < 0 || 
-                        btnRect.right > window.innerWidth || btnRect.bottom > window.innerHeight) {
-                        positionNonButtonRandomly();
-                    }
+                if (!isCelebrating && !isNonFixed) {
+                    // Re-positionner Non si ce n'est pas en mode fixed
+                    positionNonButtonInitially();
                 }
             });
             
             // Message initial
-            message.textContent = "Essaie de cliquer sur 'Non'... bonne chance! 😈";
+            message.textContent = "Essaie de cliquer sur 'Non'... si tu peux! 😈";
             message.style.display = 'block';
         });
     </script>
