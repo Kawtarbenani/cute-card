@@ -24,6 +24,7 @@
             padding: 20px;
             position: relative;
             overflow: hidden;
+            cursor: default;
         }
         
         .container {
@@ -74,7 +75,7 @@
             background: linear-gradient(135deg, #fff5f9 0%, #f0f8ff 100%);
             border-radius: 18px;
             padding: 25px;
-            margin: 25px 0 40px 0; /* More space below */
+            margin: 25px 0 40px 0;
             border: 3px dashed #ffafcc;
         }
         
@@ -92,7 +93,7 @@
             padding: 8px 20px;
             border-radius: 50px;
             display: inline-block;
-            margin: 0 8px 15px 8px; /* Space below name */
+            margin: 0 8px 15px 8px;
             border: 3px solid #ffafcc;
         }
         
@@ -135,16 +136,14 @@
             border-radius: 60px;
             cursor: pointer;
             box-shadow: 0 8px 20px rgba(255, 92, 141, 0.4);
-            position: absolute;
-            z-index: 20;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: fixed;
+            z-index: 100;
             font-weight: 800;
             display: flex;
             align-items: center;
             gap: 10px;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
+            transition: none !important;
+            animation: none !important;
         }
         
         .non-btn .shy-text {
@@ -166,7 +165,7 @@
             border-radius: 15px;
             border: 3px solid #ffafcc;
             display: none;
-            animation: messagePop 0.5s ease;
+            animation: messagePop 0.3s ease;
         }
         
         @keyframes messagePop {
@@ -177,7 +176,7 @@
         .celebration {
             display: none;
             margin-top: 30px;
-            animation: celebrateIn 1s ease;
+            animation: celebrateIn 0.8s ease;
         }
         
         @keyframes celebrateIn {
@@ -201,7 +200,7 @@
             color: #ff006e;
             font-weight: 900;
             margin: 15px 0;
-            animation: bounce 0.8s infinite alternate;
+            animation: bounce 0.6s infinite alternate;
             text-shadow: 3px 3px 0 #ffafcc;
         }
         
@@ -309,7 +308,7 @@
             </div>
             
             <div class="footer">
-                <p>Le bouton "Non" fuit n'importe où sur la page! 😉</p>
+                <p>Le bouton "Non" fuit SUPER VITE! 😉</p>
             </div>
         </div>
     </div>
@@ -321,18 +320,20 @@
             const message = document.getElementById('message');
             const celebration = document.getElementById('celebration');
             
-            let isMoving = false;
-            let nonBtnPosition = { x: window.innerWidth/2 - nonBtn.offsetWidth/2, y: 200 };
+            let lastMoveTime = 0;
+            let isCelebrating = false;
             
             // Position non button initially
-            nonBtn.style.position = 'fixed';
             nonBtn.style.left = '50%';
             nonBtn.style.top = '50%';
             nonBtn.style.transform = 'translate(-50%, -50%)';
             
-            // Make button run anywhere on the page
-            function makeButtonEscape(event) {
-                if (isMoving) return;
+            // Make button escape FAST when mouse gets close
+            document.addEventListener('mousemove', function(event) {
+                if (isCelebrating) return;
+                
+                const now = Date.now();
+                if (now - lastMoveTime < 100) return; // Limit to 10 moves per second max
                 
                 const btnRect = nonBtn.getBoundingClientRect();
                 const btnCenterX = btnRect.left + btnRect.width / 2;
@@ -343,134 +344,141 @@
                     Math.pow(event.clientY - btnCenterY, 2)
                 );
                 
-                // If mouse is within 100px of button, escape!
-                if (distance < 100) {
-                    isMoving = true;
+                // If mouse is within 120px of button, ESCAPE FAST!
+                if (distance < 120) {
+                    lastMoveTime = now;
                     
-                    // Calculate escape direction (opposite of mouse)
+                    // Calculate escape direction
                     const angle = Math.atan2(btnCenterY - event.clientY, btnCenterX - event.clientX);
-                    const escapeDistance = 150 + Math.random() * 200;
                     
-                    // Calculate new position anywhere on screen
+                    // Random escape distance (shorter for faster response)
+                    const escapeDistance = 100 + Math.random() * 150;
+                    
+                    // Calculate new position
                     let newX = btnCenterX + Math.cos(angle) * escapeDistance;
                     let newY = btnCenterY + Math.sin(angle) * escapeDistance;
                     
-                    // Keep button within viewport (with some padding)
-                    const viewportWidth = window.innerWidth;
-                    const viewportHeight = window.innerHeight;
-                    const padding = 50;
+                    // Keep button within viewport
+                    const padding = 30;
+                    newX = Math.max(padding, Math.min(newX, window.innerWidth - nonBtn.offsetWidth - padding));
+                    newY = Math.max(padding, Math.min(newY, window.innerHeight - nonBtn.offsetHeight - padding));
                     
-                    newX = Math.max(padding, Math.min(newX, viewportWidth - nonBtn.offsetWidth - padding));
-                    newY = Math.max(padding, Math.min(newY, viewportHeight - nonBtn.offsetHeight - padding));
-                    
-                    // Smooth animation
-                    nonBtn.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    // INSTANT movement (no transition)
                     nonBtn.style.left = `${newX}px`;
                     nonBtn.style.top = `${newY}px`;
                     nonBtn.style.transform = 'translate(0, 0)';
                     
-                    // Show fun message
-                    const messages = [
-                        "Haha! Il s'échappe! 😆",
-                        "Trop rapide! ⚡",
-                        "Presque... mais non! 😅",
-                        "Il est insaisissable! 🎯",
-                        "Essaie encore! 😄",
-                        "Oh non! Encore raté! 🙈",
-                        "Il court partout! 🏃‍♂️💨",
-                        "Attrape-moi si tu peux! 😈"
-                    ];
-                    
-                    message.textContent = messages[Math.floor(Math.random() * messages.length)];
-                    message.style.display = 'block';
-                    
-                    // Add fun effects
-                    const scale = Math.max(0.7, 1 - Math.random() * 0.3);
-                    const rotate = Math.random() * 30 - 15;
-                    
-                    setTimeout(() => {
-                        nonBtn.style.transform = `translate(0, 0) scale(${scale}) rotate(${rotate}deg)`;
+                    // Show message (but not every time to avoid spam)
+                    if (Math.random() > 0.7) {
+                        const messages = [
+                            "Trop rapide! ⚡",
+                            "Raté! 😆",
+                            "Pas si vite! 🏃‍♂️",
+                            "Haha! 😈",
+                            "Essaie encore! 💨",
+                            "Presque! 🙈",
+                            "Trop lent! 😄",
+                            "Attrape-moi! 🎯"
+                        ];
+                        message.textContent = messages[Math.floor(Math.random() * messages.length)];
+                        message.style.display = 'block';
                         
-                        // Add bounce effect
+                        // Hide message after 1 second
                         setTimeout(() => {
-                            nonBtn.style.transform = `translate(0, -10px) scale(${scale}) rotate(${rotate}deg)`;
-                            setTimeout(() => {
-                                nonBtn.style.transform = `translate(0, 0) scale(${scale}) rotate(${rotate}deg)`;
-                                
-                                // Create escape trail effect
-                                for (let i = 0; i < 3; i++) {
-                                    setTimeout(() => {
-                                        createEscapeEffect(newX, newY);
-                                    }, i * 100);
-                                }
-                                
-                                isMoving = false;
-                            }, 150);
-                        }, 150);
-                    }, 500);
+                            if (!isCelebrating) {
+                                message.style.display = 'none';
+                            }
+                        }, 1000);
+                    }
                     
-                    // Randomly teleport sometimes (for extra fun)
-                    if (Math.random() > 0.8) {
+                    // Add quick visual effect
+                    nonBtn.style.boxShadow = '0 0 0 3px rgba(255, 255, 255, 0.8)';
+                    setTimeout(() => {
+                        nonBtn.style.boxShadow = '0 8px 20px rgba(255, 92, 141, 0.4)';
+                    }, 100);
+                    
+                    // Sometimes teleport to random location for extra challenge
+                    if (Math.random() > 0.85) {
                         setTimeout(() => {
-                            const randomX = Math.random() * (viewportWidth - nonBtn.offsetWidth - 100) + 50;
-                            const randomY = Math.random() * (viewportHeight - nonBtn.offsetHeight - 100) + 50;
-                            
-                            nonBtn.style.transition = 'all 0.3s ease';
+                            const randomX = Math.random() * (window.innerWidth - nonBtn.offsetWidth - 60) + 30;
+                            const randomY = Math.random() * (window.innerHeight - nonBtn.offsetHeight - 60) + 30;
                             nonBtn.style.left = `${randomX}px`;
                             nonBtn.style.top = `${randomY}px`;
-                            nonBtn.style.transform = 'scale(1.2)';
                             
-                            setTimeout(() => {
-                                nonBtn.style.transform = 'scale(1)';
-                            }, 300);
+                            // Teleport effect
+                            const teleport = document.createElement('div');
+                            teleport.innerHTML = '🌀';
+                            teleport.style.position = 'fixed';
+                            teleport.style.left = `${randomX}px`;
+                            teleport.style.top = `${randomY}px`;
+                            teleport.style.fontSize = '30px';
+                            teleport.style.zIndex = '99';
+                            teleport.style.opacity = '0';
+                            teleport.style.transform = 'scale(0)';
+                            document.body.appendChild(teleport);
                             
-                            message.textContent = "Téléportation! 🌀";
-                        }, 800);
+                            // Animate teleport effect
+                            teleport.animate([
+                                { transform: 'scale(0)', opacity: 0 },
+                                { transform: 'scale(1.5)', opacity: 0.7 },
+                                { transform: 'scale(0)', opacity: 0 }
+                            ], {
+                                duration: 400,
+                                easing: 'ease-out'
+                            });
+                            
+                            setTimeout(() => teleport.remove(), 400);
+                        }, 50);
+                    }
+                    
+                    // Make button slightly smaller sometimes
+                    if (Math.random() > 0.5) {
+                        const scale = 0.85 + Math.random() * 0.15;
+                        nonBtn.style.transform = `scale(${scale})`;
                     }
                 }
-            }
+            });
             
-            // Create escape trail effect
-            function createEscapeEffect(x, y) {
-                const trail = document.createElement('div');
-                trail.innerHTML = '💨';
-                trail.style.position = 'fixed';
-                trail.style.left = `${x}px`;
-                trail.style.top = `${y}px`;
-                trail.style.fontSize = '20px';
-                trail.style.zIndex = '15';
-                trail.style.opacity = '0.7';
-                trail.style.pointerEvents = 'none';
-                
-                document.body.appendChild(trail);
-                
-                trail.animate([
-                    { transform: 'scale(1) rotate(0deg)', opacity: 0.7 },
-                    { transform: 'scale(1.5) rotate(180deg) translateX(-30px)', opacity: 0 }
-                ], {
-                    duration: 500,
-                    easing: 'ease-out'
-                });
-                
-                setTimeout(() => trail.remove(), 500);
-            }
-            
-            // Track mouse movement for escaping
-            document.addEventListener('mousemove', makeButtonEscape);
-            
-            // Also escape if mouse enters button
+            // Also escape immediately if mouse enters button
             nonBtn.addEventListener('mouseenter', function(event) {
-                if (!isMoving) {
-                    makeButtonEscape(event);
-                }
+                // Trigger immediate escape
+                const fakeEvent = new MouseEvent('mousemove', {
+                    clientX: event.clientX,
+                    clientY: event.clientY
+                });
+                document.dispatchEvent(fakeEvent);
+            });
+            
+            // Try to click the button (will be very hard!)
+            nonBtn.addEventListener('mousedown', function(event) {
+                event.preventDefault();
+                
+                // Even on click attempt, move away
+                const fakeEvent = new MouseEvent('mousemove', {
+                    clientX: event.clientX + 150,
+                    clientY: event.clientY + 150
+                });
+                document.dispatchEvent(fakeEvent);
+                
+                // Show "almost" message
+                message.textContent = "Haha! Presque réussi! 😅";
+                message.style.display = 'block';
+                
+                // Make button jump
+                nonBtn.style.transform = 'translateY(-20px)';
+                setTimeout(() => {
+                    nonBtn.style.transform = 'translateY(0)';
+                }, 200);
             });
             
             // When OUI is clicked
             ouiBtn.addEventListener('click', function() {
-                // Stop tracking mouse
-                document.removeEventListener('mousemove', makeButtonEscape);
+                isCelebrating = true;
                 
-                // Hide buttons and message
+                // Remove all event listeners
+                document.removeEventListener('mousemove', arguments.callee);
+                
+                // Hide buttons
                 ouiBtn.style.display = 'none';
                 nonBtn.style.display = 'none';
                 message.style.display = 'none';
@@ -478,32 +486,28 @@
                 // Show celebration
                 celebration.style.display = 'block';
                 
-                // Create massive confetti celebration
-                for (let i = 0; i < 80; i++) {
+                // Create massive fast confetti
+                for (let i = 0; i < 100; i++) {
                     setTimeout(() => {
                         createConfetti();
-                    }, i * 20);
+                    }, i * 15);
                 }
                 
-                // Change background to celebration mode
+                // Change background
                 document.body.style.background = 'linear-gradient(135deg, #ff9ec0 0%, #a29bfe 50%, #74b9ff 100%)';
-                document.body.style.animation = 'rainbowBG 10s infinite alternate';
                 
-                // Add rainbow background animation
-                const style = document.createElement('style');
-                style.textContent = `
-                    @keyframes rainbowBG {
-                        0% { filter: hue-rotate(0deg); }
-                        100% { filter: hue-rotate(360deg); }
-                    }
-                `;
-                document.head.appendChild(style);
+                // Add sparkle effect
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        createSparkle();
+                    }, i * 100);
+                }
             });
             
-            // Create confetti particles
+            // Create fast confetti
             function createConfetti() {
                 const confetti = document.createElement('div');
-                confetti.innerHTML = ['🎉', '✨', '🎊', '🥳', '💖', '🌟', '😊', '🎈'][Math.floor(Math.random() * 8)];
+                confetti.innerHTML = ['🎉', '✨', '🎊', '🥳', '💖', '🌟'][Math.floor(Math.random() * 6)];
                 confetti.style.position = 'fixed';
                 confetti.style.fontSize = (Math.random() * 25 + 15) + 'px';
                 confetti.style.left = Math.random() * 100 + 'vw';
@@ -513,13 +517,12 @@
                 
                 document.body.appendChild(confetti);
                 
-                // Random animation
-                const duration = Math.random() * 3000 + 1500;
-                const endX = Math.random() * 200 - 100;
+                // Fast animation
+                const duration = Math.random() * 1000 + 500;
                 
                 confetti.animate([
                     { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
-                    { transform: `translateY(${window.innerHeight + 100}px) translateX(${endX}px) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+                    { transform: `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 720}deg)`, opacity: 0 }
                 ], {
                     duration: duration,
                     easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)'
@@ -528,17 +531,45 @@
                 setTimeout(() => confetti.remove(), duration);
             }
             
+            // Create sparkle effect
+            function createSparkle() {
+                const sparkle = document.createElement('div');
+                sparkle.innerHTML = '✨';
+                sparkle.style.position = 'fixed';
+                sparkle.style.fontSize = '40px';
+                sparkle.style.left = Math.random() * 100 + 'vw';
+                sparkle.style.top = Math.random() * 100 + 'vh';
+                sparkle.style.zIndex = '1001';
+                sparkle.style.opacity = '0';
+                
+                document.body.appendChild(sparkle);
+                
+                sparkle.animate([
+                    { transform: 'scale(0) rotate(0deg)', opacity: 0 },
+                    { transform: 'scale(1.5) rotate(180deg)', opacity: 0.8 },
+                    { transform: 'scale(0) rotate(360deg)', opacity: 0 }
+                ], {
+                    duration: 800,
+                    easing: 'ease-out'
+                });
+                
+                setTimeout(() => sparkle.remove(), 800);
+            }
+            
             // Handle window resize
             window.addEventListener('resize', function() {
                 const btnRect = nonBtn.getBoundingClientRect();
                 if (btnRect.left < 0 || btnRect.top < 0 || 
                     btnRect.right > window.innerWidth || btnRect.bottom > window.innerHeight) {
-                    // Reset button position if it's outside viewport
                     nonBtn.style.left = '50%';
                     nonBtn.style.top = '50%';
                     nonBtn.style.transform = 'translate(-50%, -50%)';
                 }
             });
+            
+            // Initial message
+            message.textContent = "Essaie de cliquer sur 'Non'... si tu peux! 😈";
+            message.style.display = 'block';
         });
     </script>
 </body>
