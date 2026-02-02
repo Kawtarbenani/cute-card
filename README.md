@@ -64,6 +64,23 @@
             100% { transform: rotate(360deg); }
         }
         
+        /* NORMAL TEXT - NOT A BUTTON */
+        .cute-card-text {
+            font-family: 'Comic Neue', cursive;
+            font-size: 2.5rem;
+            color: #ff006e;
+            margin-bottom: 25px;
+            text-shadow: 2px 2px 0 #ffafcc;
+            padding: 15px 30px;
+            background: #ffe5ec;
+            border-radius: 20px;
+            display: inline-block;
+            border: 4px solid #ffafcc;
+            cursor: default; /* Normal cursor, not pointer */
+            user-select: none; /* Can't select text */
+        }
+        
+        /* Title inside card */
         .title {
             font-family: 'Comic Neue', cursive;
             font-size: 2rem;
@@ -280,6 +297,11 @@
                 padding: 30px 20px;
             }
             
+            .cute-card-text {
+                font-size: 2rem;
+                padding: 12px 20px;
+            }
+            
             .title {
                 font-size: 1.8rem;
             }
@@ -330,6 +352,9 @@
     </style>
 </head>
 <body>
+    <!-- Cute-Card as NORMAL TEXT at the top -->
+    <div class="cute-card-text">Cute-Card</div>
+    
     <div class="cute-emoji emoji-1">🌸</div>
     <div class="cute-emoji emoji-2">✨</div>
     <div class="cute-emoji emoji-3">💖</div>
@@ -393,6 +418,7 @@
             let isNonFixed = false;
             let gifRestartInterval = null;
             let teleportCooldown = false;
+            let autoTeleportInterval = null; // Store interval to clear it
             
             // Restart GIF function
             function restartGif() {
@@ -515,8 +541,8 @@
                     Math.pow(event.clientY - btnCenterY, 2)
                 );
                 
-                // SUPER SENSITIVE - teleports from 180px away
-                if (distance < 180) {
+                // Teleports from 150px away (changed from 180px)
+                if (distance < 150) {
                     teleportButton();
                 }
             });
@@ -544,16 +570,16 @@
                 message.style.display = 'block';
             });
             
-            // Auto-teleport button every 0.8-1.5 seconds to keep it active
-            setInterval(() => {
-                if (!isCelebrating && Math.random() > 0.2) {
-                    teleportButton();
-                }
-            }, Math.random() * 700 + 800);
+            // REMOVED AUTO-TELEPORT - Button only moves when mouse approaches
             
             // When OUI is clicked
             ouiBtn.addEventListener('click', function() {
                 isCelebrating = true;
+                
+                // Clear any auto-teleport interval if it exists
+                if (autoTeleportInterval) {
+                    clearInterval(autoTeleportInterval);
+                }
                 
                 ouiBtn.style.display = 'none';
                 nonBtn.style.display = 'none';
@@ -635,13 +661,6 @@
             // Initial message
             message.textContent = "Essaie d'attraper le bouton 'Non'... Bonne chance! 😈";
             message.style.display = 'block';
-            
-            // Initial teleport after 0.5 seconds
-            setTimeout(() => {
-                if (!isCelebrating) {
-                    teleportButton();
-                }
-            }, 500);
         });
     </script>
 </body>
