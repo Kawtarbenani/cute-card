@@ -19,12 +19,12 @@
             background: linear-gradient(135deg, #ffafcc 0%, #a2d2ff 100%);
             min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            padding: 20px;
+            padding: 40px 20px;
             position: relative;
-            overflow: hidden;
             cursor: default;
+            overflow-y: auto; /* Enable scrolling */
         }
         
         .container {
@@ -32,6 +32,7 @@
             width: 100%;
             z-index: 10;
             position: relative;
+            margin: 20px 0;
         }
         
         .card {
@@ -75,7 +76,7 @@
             background: linear-gradient(135deg, #fff5f9 0%, #f0f8ff 100%);
             border-radius: 18px;
             padding: 25px;
-            margin: 25px 0 60px 0; /* More space below for buttons */
+            margin: 25px 0 30px 0; /* Less space below */
             border: 3px dashed #ffafcc;
             position: relative;
             z-index: 5;
@@ -101,8 +102,8 @@
         
         .buttons-area {
             position: relative;
-            margin: 20px 0 40px 0;
-            min-height: 150px;
+            margin: 20px 0;
+            min-height: 80px;
             z-index: 10;
         }
         
@@ -139,7 +140,7 @@
             border-radius: 60px;
             cursor: pointer;
             box-shadow: 0 8px 20px rgba(255, 92, 141, 0.4);
-            position: fixed;
+            position: fixed; /* Changed from absolute to fixed */
             z-index: 100;
             font-weight: 800;
             display: flex;
@@ -147,10 +148,10 @@
             gap: 10px;
             transition: none !important;
             animation: none !important;
-            /* Start position BELOW the card */
+            /* Position it BELOW the card initially */
             left: 50%;
-            top: calc(50% + 180px);
-            transform: translate(-50%, -50%);
+            transform: translateX(-50%);
+            top: 70vh; /* Below the viewport initially */
         }
         
         .non-btn .shy-text {
@@ -272,7 +273,6 @@
             .non-btn {
                 padding: 16px 35px;
                 font-size: 1.4rem;
-                top: calc(50% + 160px);
             }
             
             .yay-text {
@@ -282,6 +282,15 @@
             .cute-emoji {
                 font-size: 1.6rem;
             }
+        }
+        
+        /* Make sure page is scrollable */
+        html {
+            overflow-y: scroll;
+        }
+        
+        body {
+            min-height: 120vh; /* Make body taller than viewport */
         }
     </style>
 </head>
@@ -329,34 +338,46 @@
         <span class="shy-text">(shy 😈)</span>
     </button>
 
+    <!-- Add some extra space at bottom for scrolling -->
+    <div style="height: 200px; width: 100%;"></div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const ouiBtn = document.getElementById('ouiBtn');
             const nonBtn = document.getElementById('nonBtn');
             const message = document.getElementById('message');
             const celebration = document.getElementById('celebration');
+            const card = document.querySelector('.card');
             
             let lastMoveTime = 0;
             let isCelebrating = false;
+            let nonBtnPlaced = false;
             
-            // Position initiale du bouton NON (en dessous de la carte)
-            function positionNonButton() {
-                const cardRect = document.querySelector('.card').getBoundingClientRect();
-                const windowHeight = window.innerHeight;
+            // Function to place Non button BELOW the card
+            function placeNonButtonBelowCard() {
+                if (nonBtnPlaced) return;
                 
-                // Positionner le bouton 50px en dessous de la carte
-                const targetY = cardRect.bottom + 50;
+                const cardRect = card.getBoundingClientRect();
+                const scrollY = window.pageYOffset || document.documentElement.scrollTop;
                 
-                // Si ça dépasse la fenêtre, le mettre plus haut
-                const finalY = Math.min(targetY, windowHeight - nonBtn.offsetHeight - 20);
+                // Position button 100px below the card (in document coordinates, not viewport)
+                const targetTop = cardRect.bottom + scrollY + 50;
                 
-                nonBtn.style.left = `${cardRect.left + (cardRect.width - nonBtn.offsetWidth) / 2}px`;
-                nonBtn.style.top = `${finalY}px`;
-                nonBtn.style.transform = 'translate(0, 0)';
+                // Set button position
+                nonBtn.style.position = 'absolute'; // Change from fixed to absolute
+                nonBtn.style.top = `${targetTop}px`;
+                nonBtn.style.left = '50%';
+                nonBtn.style.transform = 'translateX(-50%)';
+                
+                nonBtnPlaced = true;
+                console.log('Non button placed at:', targetTop, 'card bottom:', cardRect.bottom, 'scroll:', scrollY);
             }
             
-            // Position initiale
-            positionNonButton();
+            // Initial placement
+            setTimeout(placeNonButtonBelowCard, 100);
+            
+            // Also place on window resize
+            window.addEventListener('resize', placeNonButtonBelowCard);
             
             // Make button escape FAST when mouse gets close
             document.addEventListener('mousemove', function(event) {
@@ -384,28 +405,46 @@
                     // Random escape distance
                     const escapeDistance = 100 + Math.random() * 150;
                     
-                    // Calculate new position (anywhere on screen)
-                    let newX = btnCenterX + Math.cos(angle) * escapeDistance;
-                    let newY = btnCenterY + Math.sin(angle) * escapeDistance;
+                    // Calculate new position (absolute positioning within document)
+                    const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
+                    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
                     
-                    // Keep button within viewport
+                    let newX = btnRect.left + scrollX + Math.cos(angle) * escapeDistance;
+                    let newY = btnRect.top + scrollY + Math.sin(angle) * escapeDistance;
+                    
+                    // Keep button within document bounds
+                    const docWidth = document.documentElement.scrollWidth;
+                    const docHeight = document.documentElement.scrollHeight;
                     const padding = 30;
-                    newX = Math.max(padding, Math.min(newX, window.innerWidth - nonBtn.offsetWidth - padding));
-                    newY = Math.max(padding, Math.min(newY, window.innerHeight - nonBtn.offsetHeight - padding));
                     
-                    // Ensure button doesn't cover the question
-                    const cardRect = document.querySelector('.card').getBoundingClientRect();
+                    newX = Math.max(padding, Math.min(newX, docWidth - nonBtn.offsetWidth - padding));
+                    newY = Math.max(padding, Math.min(newY, docHeight - nonBtn.offsetHeight - padding));
+                    
+                    // Convert back to viewport coordinates for absolute positioning
+                    const viewportX = newX - scrollX;
+                    const viewportY = newY - scrollY;
+                    
+                    // Check if new position would cover the question
                     const questionRect = document.querySelector('.question-box').getBoundingClientRect();
                     
-                    // If button is trying to go over the question area, push it away
-                    if (newX > questionRect.left - 50 && newX < questionRect.right + 50 &&
-                        newY > questionRect.top - 50 && newY < questionRect.bottom + 50) {
+                    // If button would cover question, adjust position
+                    if (viewportX < questionRect.right && viewportX + nonBtn.offsetWidth > questionRect.left &&
+                        viewportY < questionRect.bottom && viewportY + nonBtn.offsetHeight > questionRect.top) {
                         // Push button away from question area
-                        newX = Math.random() > 0.5 ? questionRect.left - 80 : questionRect.right + 80;
-                        newY = questionRect.top + Math.random() * questionRect.height;
+                        if (Math.random() > 0.5) {
+                            newX = questionRect.left + scrollX - nonBtn.offsetWidth - 20;
+                        } else {
+                            newX = questionRect.right + scrollX + 20;
+                        }
+                        newY = questionRect.top + scrollY + Math.random() * questionRect.height;
+                        
+                        // Recalculate viewport position
+                        viewportX = newX - scrollX;
+                        viewportY = newY - scrollY;
                     }
                     
-                    // INSTANT movement
+                    // INSTANT movement with absolute positioning
+                    nonBtn.style.position = 'absolute';
                     nonBtn.style.left = `${newX}px`;
                     nonBtn.style.top = `${newY}px`;
                     nonBtn.style.transform = 'translate(0, 0)';
@@ -441,19 +480,29 @@
                     // Sometimes teleport
                     if (Math.random() > 0.85) {
                         setTimeout(() => {
-                            // Find a spot that's NOT over the question
+                            // Find a safe spot not covering question
                             let safeX, safeY;
                             let attempts = 0;
                             
                             do {
-                                safeX = Math.random() * (window.innerWidth - nonBtn.offsetWidth - 60) + 30;
-                                safeY = Math.random() * (window.innerHeight - nonBtn.offsetHeight - 60) + 30;
+                                safeX = Math.random() * (docWidth - nonBtn.offsetWidth - 60) + 30;
+                                safeY = Math.random() * (docHeight - nonBtn.offsetHeight - 60) + 30;
                                 attempts++;
                                 
-                                // Ensure not over question area
-                            } while (attempts < 10 && 
-                                     safeX > questionRect.left - 50 && safeX < questionRect.right + 50 &&
-                                     safeY > questionRect.top - 50 && safeY < questionRect.bottom + 50);
+                                // Check if this position covers question
+                                const safeViewportX = safeX - scrollX;
+                                const safeViewportY = safeY - scrollY;
+                                
+                                const coversQuestion = (
+                                    safeViewportX < questionRect.right && 
+                                    safeViewportX + nonBtn.offsetWidth > questionRect.left &&
+                                    safeViewportY < questionRect.bottom && 
+                                    safeViewportY + nonBtn.offsetHeight > questionRect.top
+                                );
+                                
+                                if (!coversQuestion || attempts > 10) break;
+                                
+                            } while (true);
                             
                             nonBtn.style.left = `${safeX}px`;
                             nonBtn.style.top = `${safeY}px`;
@@ -462,8 +511,8 @@
                             const teleport = document.createElement('div');
                             teleport.innerHTML = '🌀';
                             teleport.style.position = 'fixed';
-                            teleport.style.left = `${safeX}px`;
-                            teleport.style.top = `${safeY}px`;
+                            teleport.style.left = `${safeX - scrollX}px`;
+                            teleport.style.top = `${safeY - scrollY}px`;
                             teleport.style.fontSize = '30px';
                             teleport.style.zIndex = '99';
                             teleport.style.opacity = '0';
@@ -596,21 +645,6 @@
                 
                 setTimeout(() => sparkle.remove(), 800);
             }
-            
-            // Handle window resize
-            window.addEventListener('resize', function() {
-                positionNonButton();
-                
-                const btnRect = nonBtn.getBoundingClientRect();
-                const cardRect = document.querySelector('.card').getBoundingClientRect();
-                const questionRect = document.querySelector('.question-box').getBoundingClientRect();
-                
-                // If button is over question area, move it
-                if (btnRect.left < questionRect.right && btnRect.right > questionRect.left &&
-                    btnRect.top < questionRect.bottom && btnRect.bottom > questionRect.top) {
-                    positionNonButton();
-                }
-            });
             
             // Initial message
             message.textContent = "Essaie de cliquer sur 'Non'... si tu peux! 😈";
