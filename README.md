@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✨ A Special Invitation ✨</title>
+    <title>✨ For Sofia ✨</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
@@ -130,7 +130,7 @@
         }
         
         .invite-text {
-            font-size: 1.4rem;
+            font-size: 1.8rem;
             color: #555;
             margin-bottom: 15px;
             line-height: 1.6;
@@ -171,6 +171,7 @@
             margin: 40px 0;
             position: relative;
             min-height: 200px;
+            height: 250px;
         }
         
         button {
@@ -197,6 +198,7 @@
             left: 50%;
             transform: translateX(-50%);
             animation: bounce 2s infinite;
+            z-index: 2;
         }
         
         @keyframes bounce {
@@ -216,6 +218,7 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 4;
+            position: absolute;
         }
         
         #non-btn:hover {
@@ -325,6 +328,24 @@
             margin-top: 10px;
         }
         
+        .devil-emoji {
+            font-size: 1.2em;
+            margin-left: 10px;
+            animation: devilWiggle 0.5s infinite alternate;
+        }
+        
+        @keyframes devilWiggle {
+            0% { transform: rotate(-10deg); }
+            100% { transform: rotate(10deg); }
+        }
+        
+        .shy-text {
+            font-size: 0.8em;
+            opacity: 0.7;
+            font-style: italic;
+            margin-left: 5px;
+        }
+        
         /* Mobile responsive */
         @media (max-width: 768px) {
             .card {
@@ -336,7 +357,7 @@
             }
             
             .invite-text {
-                font-size: 1.2rem;
+                font-size: 1.5rem;
             }
             
             button {
@@ -368,14 +389,13 @@
     <div class="card-container">
         <div class="card">
             <div class="card-header">
-                <h1><i class="fas fa-heart"></i> Mon Trésor <i class="fas fa-heart"></i></h1>
-                <p class="invite-text">Ma chérie, j'ai une petite question pour toi...</p>
+                <h1><i class="fas fa-heart"></i> Pour Sofia <i class="fas fa-heart"></i></h1>
+                <p class="invite-text">Sofia, on sort vendredi ?</p>
             </div>
             
             <div class="invitation-box">
-                <p class="invite-text">Veux-tu passer une soirée magique avec moi</p>
-                <p class="invite-text">ce <span class="highlight">vendredi</span> ?</p>
-                <p class="invite-text">Juste toi, moi, et les étoiles ✨</p>
+                <p class="invite-text">Juste une soirée magique ensemble ✨</p>
+                <p class="invite-text">Promis, ça sera génial ! 💖</p>
             </div>
             
             <div class="buttons-container">
@@ -383,26 +403,26 @@
                     <i class="fas fa-heart"></i> OUI ! <i class="fas fa-heart"></i>
                 </button>
                 <button id="non-btn">
-                    <i class="fas fa-times"></i> Peut-être... <i class="fas fa-running"></i>
+                    Non <span class="shy-text">(a bit shy)</span> <span class="devil-emoji">😈</span>
                 </button>
             </div>
             
             <div class="message-container">
-                <div id="message">Fais ton choix, ma belle! 💖</div>
+                <div id="message">Fais ton choix Sofia! 💖</div>
             </div>
             
             <div class="celebration" id="celebration">
                 <img class="celebration-gif" src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Celebration">
-                <div class="celebration-text">Hourra! À vendredi, mon amour! 🥂✨</div>
+                <div class="celebration-text">Super! À vendredi Sofia! 🥂✨</div>
             </div>
             
             <div class="counter">
-                <i class="fas fa-redo"></i> Tentatives d'échapper: <span id="counter">0</span>
+                <i class="fas fa-redo"></i> Times "Non" tried to escape: <span id="counter">0</span>
             </div>
             
             <div class="footer">
                 <p>Avec tout mon amour ❤️</p>
-                <p class="secret-note">P.S. Essaie de cliquer sur "Peut-être"... 😉</p>
+                <p class="secret-note">P.S. Essaie de cliquer sur "Non" 😉</p>
             </div>
             
             <!-- Secret info - hidden from user -->
@@ -423,16 +443,7 @@
             const heartsContainer = document.getElementById('hearts-container');
             
             let clickCount = 0;
-            const messages = [
-                "Tu es sûre, ma belle? 🥺",
-                "Mais pense aux moments magiques! ✨",
-                "Je t'offrirai des fleurs! 🌸",
-                "Et du chocolat! 🍫",
-                "On regardera les étoiles! 🌟",
-                "S'il te plaît? 🙏",
-                "Je ferai n'importe quoi! 🤲",
-                "Dernière chance de dire oui! 😘"
-            ];
+            let nonBtnPosition = { x: 50, y: 100 }; // Starting position
             
             // Create floating hearts
             function createHearts() {
@@ -448,93 +459,148 @@
                 }
             }
             
-            // Function to move the "Non" button in a fun way
-            function moveNonButton() {
+            // Function to move the "Non" button away from cursor
+            function moveNonButtonAwayFromCursor(event) {
                 const container = document.querySelector('.buttons-container');
                 const containerRect = container.getBoundingClientRect();
                 const buttonRect = nonBtn.getBoundingClientRect();
                 
-                // Different escape patterns
-                const patterns = [
-                    { x: Math.random() * (containerRect.width - buttonRect.width), y: 10 },
-                    { x: 10, y: Math.random() * (containerRect.height - buttonRect.height) },
-                    { x: containerRect.width - buttonRect.width - 10, y: Math.random() * (containerRect.height - buttonRect.height) },
-                    { x: Math.random() * (containerRect.width - buttonRect.width), y: containerRect.height - buttonRect.height - 10 },
-                    { x: Math.random() * (containerRect.width - buttonRect.width), y: Math.random() * (containerRect.height - buttonRect.height) }
-                ];
+                // Get cursor position relative to container
+                const cursorX = event.clientX - containerRect.left;
+                const cursorY = event.clientY - containerRect.top;
                 
-                const pattern = patterns[Math.floor(Math.random() * patterns.length)];
+                // Get button center position
+                const buttonCenterX = nonBtn.offsetLeft + buttonRect.width / 2;
+                const buttonCenterY = nonBtn.offsetTop + buttonRect.height / 2;
                 
-                // Animate the movement
+                // Calculate distance from cursor to button
+                const distanceX = cursorX - buttonCenterX;
+                const distanceY = cursorY - buttonCenterY;
+                const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+                
+                // If cursor is getting close to button (within 100px), move it away
+                if (distance < 100) {
+                    // Calculate opposite direction from cursor
+                    const moveX = -distanceX * 2;
+                    const moveY = -distanceY * 2;
+                    
+                    // Calculate new position
+                    let newX = buttonCenterX + moveX - buttonRect.width / 2;
+                    let newY = buttonCenterY + moveY - buttonRect.height / 2;
+                    
+                    // Keep button within container bounds
+                    newX = Math.max(10, Math.min(newX, containerRect.width - buttonRect.width - 10));
+                    newY = Math.max(10, Math.min(newY, containerRect.height - buttonRect.height - 10));
+                    
+                    // Apply smooth movement
+                    nonBtn.style.transition = 'all 0.3s ease';
+                    nonBtn.style.left = `${newX}px`;
+                    nonBtn.style.top = `${newY}px`;
+                    nonBtn.style.transform = 'none';
+                    
+                    // Add a little wobble effect
+                    setTimeout(() => {
+                        nonBtn.style.transform = 'rotate(5deg)';
+                        setTimeout(() => {
+                            nonBtn.style.transform = 'rotate(-5deg)';
+                            setTimeout(() => {
+                                nonBtn.style.transform = 'rotate(0deg)';
+                            }, 100);
+                        }, 100);
+                    }, 300);
+                }
+            }
+            
+            // Function to randomly move button (when actually clicked)
+            function moveNonButtonOnClick() {
+                const container = document.querySelector('.buttons-container');
+                const containerRect = container.getBoundingClientRect();
+                const buttonRect = nonBtn.getBoundingClientRect();
+                
+                // More dramatic escape when clicked
+                const escapeDistance = 300;
+                
+                // Calculate random angle for escape
+                const angle = Math.random() * Math.PI * 2;
+                const moveX = Math.cos(angle) * escapeDistance;
+                const moveY = Math.sin(angle) * escapeDistance;
+                
+                // Calculate new position
+                let newX = nonBtn.offsetLeft + moveX;
+                let newY = nonBtn.offsetTop + moveY;
+                
+                // Keep button within container
+                newX = Math.max(10, Math.min(newX, containerRect.width - buttonRect.width - 10));
+                newY = Math.max(10, Math.min(newY, containerRect.height - buttonRect.height - 10));
+                
+                // Apply movement with bounce effect
                 nonBtn.style.transition = 'all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
-                nonBtn.style.left = `${pattern.x}px`;
-                nonBtn.style.top = `${pattern.y}px`;
-                nonBtn.style.transform = 'none';
+                nonBtn.style.left = `${newX}px`;
+                nonBtn.style.top = `${newY}px`;
                 
-                // Update click counter
+                // Update counter
                 clickCount++;
                 counter.textContent = clickCount;
                 
-                // Change button text and appearance
-                const buttonTexts = [
-                    "Non merci 😅",
-                    "Pas cette fois 🏃‍♂️",
-                    "Je réfléchis 💭",
-                    "Escape! 🚀",
-                    "Trop rapide! ⚡",
-                    "Presque! 😆",
-                    "Encore! 🎯",
-                    "Dernier essai! 🏁"
-                ];
-                
-                if (clickCount <= buttonTexts.length) {
-                    nonBtn.innerHTML = `<i class="fas fa-running"></i> ${buttonTexts[clickCount-1]} <i class="fas fa-running"></i>`;
-                }
-                
-                // Show message
-                if (clickCount <= messages.length) {
-                    message.textContent = messages[clickCount - 1];
-                    message.style.display = 'block';
-                }
-                
-                // Make button smaller and change color
-                const scale = Math.max(0.5, 1 - clickCount * 0.05);
+                // Make button smaller and change devil emoji
+                const scale = Math.max(0.4, 1 - clickCount * 0.1);
                 nonBtn.style.transform = `scale(${scale})`;
                 
-                // Change button gradient as it gets smaller
-                const red1 = Math.max(150, 255 - clickCount * 15);
-                const green1 = Math.max(100, 154 - clickCount * 10);
-                const red2 = Math.max(100, 107 - clickCount * 10);
-                const green2 = Math.max(50, 157 - clickCount * 15);
-                nonBtn.style.background = `linear-gradient(135deg, rgb(${red1}, ${green1}, 158) 0%, rgb(${red2}, ${green2}, 157) 100%)`;
-                
-                // Add floating hearts when button moves
-                for (let i = 0; i < 5; i++) {
-                    setTimeout(() => createSingleHeart(nonBtn), i * 100);
+                // Change devil emoji based on click count
+                const devilEmojis = ['😈', '👿', '😏', '😅', '🏃‍♂️', '💨', '⚡', '🎯'];
+                const devilEmoji = nonBtn.querySelector('.devil-emoji');
+                if (devilEmoji && clickCount <= devilEmojis.length) {
+                    devilEmoji.textContent = devilEmojis[clickCount - 1];
                 }
                 
-                // After 8 clicks, make the button very small and hard to click
-                if (clickCount >= 8) {
-                    nonBtn.style.opacity = "0.5";
-                    nonBtn.style.pointerEvents = "none";
+                // Make button more transparent
+                nonBtn.style.opacity = Math.max(0.3, 1 - clickCount * 0.1);
+                
+                // Create escape effect particles
+                for (let i = 0; i < 8; i++) {
+                    createEscapeParticle(nonBtn);
+                }
+                
+                // After 5 clicks, make button very hard to click
+                if (clickCount >= 5) {
+                    nonBtn.style.pointerEvents = "auto";
                     nonBtn.style.cursor = "not-allowed";
-                    message.textContent = "Tu n'as plus le choix, ma belle! 😉 Clique sur OUI!";
+                    const shyText = nonBtn.querySelector('.shy-text');
+                    if (shyText) {
+                        shyText.textContent = "(ok maybe yes)";
+                    }
+                }
+                
+                // After 7 clicks, button disappears
+                if (clickCount >= 7) {
+                    nonBtn.style.display = 'none';
+                    message.textContent = "D'accord, d'accord! Clique sur OUI maintenant! 😘";
                     message.style.display = 'block';
                 }
             }
             
-            // Create single heart at button position
-            function createSingleHeart(button) {
-                const heart = document.createElement('div');
-                heart.className = 'heart';
-                heart.innerHTML = '💖';
-                heart.style.position = 'absolute';
-                heart.style.left = button.getBoundingClientRect().left + 'px';
-                heart.style.top = button.getBoundingClientRect().top + 'px';
-                heart.style.fontSize = '20px';
-                heart.style.animation = 'float 3s linear forwards';
-                document.body.appendChild(heart);
-                setTimeout(() => heart.remove(), 3000);
+            // Create escape particles
+            function createEscapeParticle(button) {
+                const particle = document.createElement('div');
+                particle.innerHTML = '💨';
+                particle.style.position = 'absolute';
+                particle.style.left = button.getBoundingClientRect().left + 'px';
+                particle.style.top = button.getBoundingClientRect().top + 'px';
+                particle.style.fontSize = '20px';
+                particle.style.zIndex = '5';
+                particle.style.opacity = '0.8';
+                
+                // Random direction
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 50 + Math.random() * 100;
+                const duration = 0.5 + Math.random() * 0.5;
+                
+                particle.style.transition = `all ${duration}s ease-out`;
+                particle.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) rotate(${angle}rad)`;
+                particle.style.opacity = '0';
+                
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), duration * 1000);
             }
             
             // Function to handle "Oui" button click
@@ -545,17 +611,18 @@
                 message.style.display = 'none';
                 
                 // Create explosion of hearts
-                for (let i = 0; i < 50; i++) {
+                for (let i = 0; i < 30; i++) {
                     setTimeout(() => {
                         const heart = document.createElement('div');
                         heart.className = 'heart';
-                        heart.innerHTML = ['❤️', '💖', '💕', '💗', '💓'][Math.floor(Math.random() * 5)];
-                        heart.style.left = Math.random() * 100 + 'vw';
-                        heart.style.fontSize = (Math.random() * 30 + 20) + 'px';
-                        heart.style.color = ['#ff6b9d', '#ff9ec0', '#ffd166', '#a29bfe', '#00cec9'][Math.floor(Math.random() * 5)];
-                        heart.style.animation = 'float 4s linear forwards';
+                        heart.innerHTML = '💖';
+                        heart.style.left = '50%';
+                        heart.style.top = '50%';
+                        heart.style.fontSize = '30px';
+                        heart.style.color = '#ff6b9d';
+                        heart.style.animation = 'float 2s linear forwards';
                         document.body.appendChild(heart);
-                        setTimeout(() => heart.remove(), 4000);
+                        setTimeout(() => heart.remove(), 2000);
                     }, i * 50);
                 }
                 
@@ -564,44 +631,37 @@
                     celebration.style.display = 'block';
                 }, 500);
                 
-                // Change background to celebration mode
+                // Change background to celebration
                 document.body.style.background = 'linear-gradient(135deg, #ff9ec0 0%, #a29bfe 50%, #74b9ff 100%)';
-                document.body.style.animation = 'rainbowBackground 10s infinite alternate';
             }
             
             // Add event listeners
-            nonBtn.addEventListener('click', moveNonButton);
-            nonBtn.addEventListener('mouseover', function() {
-                // Sometimes move when hovering (but less often)
-                if (Math.random() > 0.8 && clickCount < 6) {
+            
+            // Make button move away when mouse gets close
+            document.querySelector('.buttons-container').addEventListener('mousemove', moveNonButtonAwayFromCursor);
+            
+            // Make button escape when clicked
+            nonBtn.addEventListener('click', moveNonButtonOnClick);
+            
+            // Also make button twitch randomly
+            setInterval(() => {
+                if (Math.random() > 0.7 && clickCount < 3) {
+                    nonBtn.style.transform = 'translateX(5px)';
                     setTimeout(() => {
-                        nonBtn.style.transform = 'translateX(20px)';
+                        nonBtn.style.transform = 'translateX(-5px)';
                         setTimeout(() => {
-                            nonBtn.style.transform = 'translateX(-20px)';
-                            setTimeout(() => {
-                                nonBtn.style.transform = 'translateX(0)';
-                            }, 100);
+                            nonBtn.style.transform = 'translateX(0)';
                         }, 100);
                     }, 100);
                 }
-            });
+            }, 2000);
             
             ouiBtn.addEventListener('click', handleOuiClick);
             
             // Initial setup
-            message.textContent = "Fais ton choix, ma belle! 💖";
+            message.textContent = "Sofia, fais ton choix! 💖";
             message.style.display = 'block';
             createHearts();
-            
-            // Add CSS for rainbow background animation
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes rainbowBackground {
-                    0% { filter: hue-rotate(0deg); }
-                    100% { filter: hue-rotate(360deg); }
-                }
-            `;
-            document.head.appendChild(style);
         });
     </script>
 </body>
