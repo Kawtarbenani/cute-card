@@ -156,7 +156,7 @@
             gap: 10px;
             order: 2;
             margin-top: 10px;
-            transition: none !important; /* NO TRANSITION FOR INSTANT MOVEMENT */
+            transition: none !important; /* NO TRANSITION FOR TELEPORTATION */
         }
         
         .non-btn .shy-text {
@@ -392,7 +392,7 @@
             let isCelebrating = false;
             let isNonFixed = false;
             let gifRestartInterval = null;
-            let lastPosition = { x: 0, y: 0 };
+            let teleportCooldown = false;
             
             // Restart GIF function
             function restartGif() {
@@ -401,9 +401,20 @@
                 celebrationGif.src = gifSrc;
             }
             
-            // Function to move button to random position
-            function moveButtonRandomly() {
-                if (isCelebrating) return;
+            // Function to TELEPORT button to random position with teleportation effect
+            function teleportButton() {
+                if (isCelebrating || teleportCooldown) return;
+                
+                // Set cooldown to prevent too many teleports
+                teleportCooldown = true;
+                setTimeout(() => {
+                    teleportCooldown = false;
+                }, 50);
+                
+                // Get current position for teleport effect
+                const btnRect = nonBtn.getBoundingClientRect();
+                const currentX = btnRect.left;
+                const currentY = btnRect.top;
                 
                 // ALWAYS move to fixed position
                 if (!isNonFixed) {
@@ -412,29 +423,40 @@
                     isNonFixed = true;
                 }
                 
-                // Random position
-                const randomX = Math.random() * (window.innerWidth - nonBtn.offsetWidth - 80) + 40;
-                const randomY = Math.random() * (window.innerHeight - nonBtn.offsetHeight - 80) + 40;
+                // TELEPORT to completely random position (anywhere on screen)
+                const randomX = Math.random() * (window.innerWidth - nonBtn.offsetWidth - 60) + 30;
+                const randomY = Math.random() * (window.innerHeight - nonBtn.offsetHeight - 60) + 30;
                 
-                // INSTANT movement
+                // Create teleport OUT effect at old position
+                createTeleportEffect(currentX, currentY);
+                
+                // INSTANT teleportation (no transition)
                 nonBtn.style.transition = 'none';
                 nonBtn.style.left = `${randomX}px`;
                 nonBtn.style.top = `${randomY}px`;
-                lastPosition = { x: randomX, y: randomY };
                 
-                // Show message 30% of the time
-                if (Math.random() > 0.7) {
+                // Random scale
+                const scale = 0.4 + Math.random() * 0.8;
+                nonBtn.style.transform = `scale(${scale})`;
+                
+                // Create teleport IN effect at new position after a tiny delay
+                setTimeout(() => {
+                    createTeleportEffect(randomX, randomY);
+                }, 10);
+                
+                // Show message 40% of the time
+                if (Math.random() > 0.6) {
                     const messages = [
-                        "Trop rapide! ⚡",
-                        "Raté! 😆",
-                        "Pas si vite! 🏃‍♂️",
-                        "Haha! 😈",
+                        "TÉLÉPORTATION! ⚡",
+                        "POOF! Disparu! ✨",
+                        "Où suis-je? 😵",
+                        "Trop rapide! 🚀",
+                        "Téléporté! 🔮",
+                        "Haha! Impossible! 😈",
                         "Essaie encore! 💨",
-                        "Presque! 🙈",
-                        "Impossible! 🚀",
-                        "Il fuit! 🌪️",
-                        "Tu m'as presque eu! 😅",
-                        "Trop lent! 🐢"
+                        "Tu me cherches? 👀",
+                        "Bip bip! Téléporté! 🌀",
+                        "Disparu comme par magie! 🪄"
                     ];
                     message.textContent = messages[Math.floor(Math.random() * messages.length)];
                     message.style.display = 'block';
@@ -443,21 +465,44 @@
                         if (!isCelebrating) {
                             message.style.display = 'none';
                         }
-                    }, 600);
+                    }, 800);
                 }
                 
                 // Visual effect
-                nonBtn.style.boxShadow = '0 0 0 8px rgba(255, 255, 255, 0.9), 0 20px 40px rgba(255, 92, 141, 0.8)';
+                nonBtn.style.boxShadow = '0 0 0 10px rgba(255, 255, 255, 0.9), 0 25px 50px rgba(255, 92, 141, 0.9)';
                 setTimeout(() => {
                     nonBtn.style.boxShadow = '0 8px 20px rgba(255, 92, 141, 0.4)';
-                }, 50);
-                
-                // Scale effect
-                const scale = 0.5 + Math.random() * 0.6;
-                nonBtn.style.transform = `scale(${scale})`;
+                }, 100);
             }
             
-            // Make Non button move INSTANTLY when mouse approaches
+            // Create teleportation effect
+            function createTeleportEffect(x, y) {
+                const teleport = document.createElement('div');
+                teleport.innerHTML = '🌀';
+                teleport.style.position = 'fixed';
+                teleport.style.left = `${x + nonBtn.offsetWidth/2 - 20}px`;
+                teleport.style.top = `${y + nonBtn.offsetHeight/2 - 20}px`;
+                teleport.style.fontSize = '40px';
+                teleport.style.zIndex = '99';
+                teleport.style.opacity = '0';
+                teleport.style.transform = 'scale(0)';
+                teleport.style.pointerEvents = 'none';
+                document.body.appendChild(teleport);
+                
+                // Teleport animation
+                teleport.animate([
+                    { transform: 'scale(0) rotate(0deg)', opacity: 0 },
+                    { transform: 'scale(2.5) rotate(360deg)', opacity: 0.9 },
+                    { transform: 'scale(0) rotate(720deg)', opacity: 0 }
+                ], {
+                    duration: 400,
+                    easing: 'cubic-bezier(0.68, -0.55, 0.27, 1.55)'
+                });
+                
+                setTimeout(() => teleport.remove(), 400);
+            }
+            
+            // Make Non button TELEPORT when mouse approaches
             document.addEventListener('mousemove', function(event) {
                 if (isCelebrating) return;
                 
@@ -470,77 +515,41 @@
                     Math.pow(event.clientY - btnCenterY, 2)
                 );
                 
-                // EXTREME sensitivity - moves from FAR away
-                if (distance < 200) { // Reacts from 200px away
-                    moveButtonRandomly();
+                // SUPER SENSITIVE - teleports from 180px away
+                if (distance < 180) {
+                    teleportButton();
                 }
             });
             
-            // Escape also when mouse enters button
+            // Teleport when mouse enters button
             nonBtn.addEventListener('mouseenter', function(event) {
                 if (!isCelebrating) {
-                    // Move button to opposite side of mouse
-                    const newX = event.clientX > window.innerWidth/2 ? 
-                        Math.random() * (window.innerWidth/3) : 
-                        window.innerWidth - nonBtn.offsetWidth - Math.random() * 100;
-                    
-                    const newY = event.clientY > window.innerHeight/2 ? 
-                        Math.random() * (window.innerHeight/3) : 
-                        window.innerHeight - nonBtn.offsetHeight - Math.random() * 100;
-                    
-                    if (!isNonFixed) {
-                        nonBtn.style.position = 'fixed';
-                        nonBtn.style.zIndex = '100';
-                        isNonFixed = true;
-                    }
-                    
-                    nonBtn.style.transition = 'none';
-                    nonBtn.style.left = `${newX}px`;
-                    nonBtn.style.top = `${newY}px`;
+                    teleportButton();
                 }
             });
             
-            // Try to click the button - makes it JUMP
+            // Try to click the button - makes it TELEPORT FAR away
             nonBtn.addEventListener('mousedown', function(event) {
                 event.preventDefault();
                 event.stopPropagation();
                 
-                // Jump FAR to opposite corner
-                const jumpX = Math.random() > 0.5 ? 
-                    Math.random() * 100 + 20 : 
-                    window.innerWidth - nonBtn.offsetWidth - Math.random() * 100 - 20;
-                
-                const jumpY = Math.random() > 0.5 ? 
-                    Math.random() * 100 + 20 : 
-                    window.innerHeight - nonBtn.offsetHeight - Math.random() * 100 - 20;
-                
-                if (!isNonFixed) {
-                    nonBtn.style.position = 'fixed';
-                    nonBtn.style.zIndex = '100';
-                    isNonFixed = true;
+                // Create multiple teleport effects
+                for(let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        teleportButton();
+                    }, i * 50);
                 }
                 
-                nonBtn.style.transition = 'none';
-                nonBtn.style.left = `${jumpX}px`;
-                nonBtn.style.top = `${jumpY}px`;
-                nonBtn.style.transform = 'scale(0.7)';
-                
-                message.textContent = "Haha! Presque réussi! Mais NON! 😅";
+                message.textContent = "Presque! Mais téléporté! 🌀";
                 message.style.display = 'block';
-                
-                // Jump animation
-                nonBtn.style.transform += ' translateY(-50px)';
-                setTimeout(() => {
-                    nonBtn.style.transform = nonBtn.style.transform.replace('translateY(-50px)', '');
-                }, 100);
             });
             
-            // Auto-move button every 1.5 seconds to keep it active
+            // Auto-teleport button every 0.8-1.5 seconds to keep it active
             setInterval(() => {
-                if (!isCelebrating && Math.random() > 0.3) {
-                    moveButtonRandomly();
+                if (!isCelebrating && Math.random() > 0.2) {
+                    teleportButton();
                 }
-            }, 1500);
+            }, Math.random() * 700 + 800);
             
             // When OUI is clicked
             ouiBtn.addEventListener('click', function() {
@@ -574,10 +583,10 @@
                         }, 1000);
                         
                         // Create confetti
-                        for (let i = 0; i < 200; i++) {
+                        for (let i = 0; i < 250; i++) {
                             setTimeout(() => {
                                 createConfetti();
-                            }, i * 3);
+                            }, i * 2);
                         }
                         
                         document.body.style.background = 'linear-gradient(135deg, #ff9ec0 0%, #a29bfe 33%, #74b9ff 66%, #ffd166 100%)';
@@ -598,7 +607,7 @@
             // Create confetti
             function createConfetti() {
                 const confetti = document.createElement('div');
-                const emojis = ['🎉', '✨', '🎊', '🥳', '💖', '🌟', '😊', '💕'];
+                const emojis = ['🎉', '✨', '🎊', '🥳', '💖', '🌟', '😊', '💕', '🌀', '⚡'];
                 confetti.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
                 confetti.style.position = 'fixed';
                 confetti.style.fontSize = (Math.random() * 30 + 15) + 'px';
@@ -609,7 +618,7 @@
                 
                 document.body.appendChild(confetti);
                 
-                const duration = Math.random() * 1000 + 400;
+                const duration = Math.random() * 800 + 300;
                 const endX = (Math.random() * 300 - 150) + 'px';
                 
                 confetti.animate([
@@ -624,15 +633,15 @@
             }
             
             // Initial message
-            message.textContent = "Essaie de cliquer sur 'Non'... si tu peux! 😈";
+            message.textContent = "Essaie d'attraper le bouton 'Non'... Bonne chance! 😈";
             message.style.display = 'block';
             
-            // Initial random move after 1 second
+            // Initial teleport after 0.5 seconds
             setTimeout(() => {
                 if (!isCelebrating) {
-                    moveButtonRandomly();
+                    teleportButton();
                 }
-            }, 1000);
+            }, 500);
         });
     </script>
 </body>
