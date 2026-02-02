@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pour Sofia</title>
+    <title>Cute-Card</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -23,6 +23,7 @@
             padding: 40px 20px;
             position: relative;
             cursor: default;
+            overflow-x: hidden;
             overflow-y: auto;
         }
         
@@ -147,16 +148,15 @@
             border-radius: 60px;
             cursor: pointer;
             box-shadow: 0 8px 20px rgba(255, 92, 141, 0.4);
-            position: relative; /* RELATIVE AU DÉBUT */
+            position: relative;
             z-index: 20;
             font-weight: 800;
             display: flex;
             align-items: center;
             gap: 10px;
-            transition: none !important;
-            animation: none !important;
-            order: 2; /* EN DESSOUS DE OUI */
+            order: 2;
             margin-top: 10px;
+            transition: none !important;
         }
         
         .non-btn .shy-text {
@@ -218,11 +218,16 @@
             to { transform: translateY(-15px); }
         }
         
-        .celebration-gif {
+        .celebration-gif-container {
+            position: relative;
             width: 100%;
             max-width: 320px;
+            margin: 10px auto;
+        }
+        
+        .celebration-gif {
+            width: 100%;
             border-radius: 20px;
-            margin: 10px 0;
             border: 6px solid #ffafcc;
             box-shadow: 0 15px 30px rgba(255, 107, 157, 0.3);
         }
@@ -297,7 +302,7 @@
                 font-size: 2.2rem;
             }
             
-            .celebration-gif {
+            .celebration-gif-container {
                 max-width: 280px;
             }
             
@@ -310,18 +315,21 @@
             }
         }
         
-        /* Make sure page is scrollable */
+        /* Make sure page is scrollable but not horizontally */
         html {
             overflow-y: scroll;
+            overflow-x: hidden;
+            width: 100%;
         }
         
         body {
             min-height: 120vh;
+            width: 100%;
+            overflow-x: hidden;
         }
     </style>
 </head>
 <body>
-    <!-- Cute emojis in corners -->
     <div class="cute-emoji emoji-1">🌸</div>
     <div class="cute-emoji emoji-2">✨</div>
     <div class="cute-emoji emoji-3">💖</div>
@@ -329,10 +337,8 @@
     
     <div class="container">
         <div class="card">
-            <!-- Title that will change -->
             <h1 class="title" id="mainTitle">Question pour toi ✨</h1>
             
-            <!-- Question Section (will be replaced) -->
             <div class="question-box" id="questionBox">
                 <p class="question" id="questionText">
                     <span class="sofia-name">Sofia</span><br>
@@ -341,22 +347,21 @@
                 </p>
             </div>
             
-            <!-- Celebration Section (hidden initially) -->
             <div class="celebration-container" id="celebrationContainer">
                 <div class="yay-text">🎉 YAY! À vendredi! 🎉</div>
-                <!-- GIF d'un homme qui célèbre -->
-                <img class="celebration-gif" src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Man Celebrating">
-                <!-- Message final qui apparaîtra -->
+                
+                <div class="celebration-gif-container">
+                    <img class="celebration-gif" id="celebrationGif" src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Man Celebrating">
+                </div>
+                
                 <div class="final-message" id="finalMessage">✨ On se voit vendredi! ✨</div>
             </div>
             
             <div class="buttons-wrapper">
-                <!-- OUI est AU-DESSUS -->
                 <button class="oui-btn" id="ouiBtn">
                     <i class="fas fa-heart"></i> OUI !
                 </button>
                 
-                <!-- NON est EN DESSOUS -->
                 <button class="non-btn" id="nonBtn">
                     <i class="fas fa-grin-tongue-squint"></i> Non 
                     <span class="shy-text">(shy 😈)</span>
@@ -371,7 +376,6 @@
         </div>
     </div>
 
-    <!-- Add some extra space at bottom for scrolling -->
     <div style="height: 200px; width: 100%;"></div>
 
     <script>
@@ -380,40 +384,127 @@
             const nonBtn = document.getElementById('nonBtn');
             const message = document.getElementById('message');
             const questionBox = document.getElementById('questionBox');
-            const questionText = document.getElementById('questionText');
             const celebrationContainer = document.getElementById('celebrationContainer');
             const mainTitle = document.getElementById('mainTitle');
             const finalMessage = document.getElementById('finalMessage');
+            const celebrationGif = document.getElementById('celebrationGif');
             
-            let lastMoveTime = 0;
             let isCelebrating = false;
             let isNonFixed = false;
+            let gifRestartInterval = null;
+            let teleportCooldown = false;
             
-            // Position initiale - S'assurer que Non est BIEN en dessous de Oui
-            function positionNonButtonInitially() {
-                // Réinitialiser la position du bouton Non
-                nonBtn.style.position = 'relative';
-                nonBtn.style.left = '0';
-                nonBtn.style.top = '0';
-                nonBtn.style.transform = 'translate(0, 0)';
-                nonBtn.style.zIndex = '20';
-                
-                // Forcer le reflow pour s'assurer que les positions sont correctes
-                void nonBtn.offsetWidth;
-                
-                console.log('Non button positioned BELOW Oui');
-                isNonFixed = false;
+            // Restart GIF function
+            function restartGif() {
+                const gifSrc = celebrationGif.src;
+                celebrationGif.src = "";
+                celebrationGif.src = gifSrc;
             }
             
-            // Position initiale
-            setTimeout(positionNonButtonInitially, 100);
+            // Function to TELEPORT button to random position with teleportation effect
+            function teleportButton() {
+                if (isCelebrating || teleportCooldown) return;
+                
+                // Set cooldown to prevent too many teleports
+                teleportCooldown = true;
+                setTimeout(() => {
+                    teleportCooldown = false;
+                }, 50);
+                
+                // Get current position for teleport effect
+                const btnRect = nonBtn.getBoundingClientRect();
+                const currentX = btnRect.left;
+                const currentY = btnRect.top;
+                
+                // ALWAYS move to fixed position
+                if (!isNonFixed) {
+                    nonBtn.style.position = 'fixed';
+                    nonBtn.style.zIndex = '100';
+                    isNonFixed = true;
+                }
+                
+                // TELEPORT to completely random position (anywhere on screen)
+                const randomX = Math.random() * (window.innerWidth - nonBtn.offsetWidth - 60) + 30;
+                const randomY = Math.random() * (window.innerHeight - nonBtn.offsetHeight - 60) + 30;
+                
+                // Create teleport OUT effect at old position
+                createTeleportEffect(currentX, currentY);
+                
+                // INSTANT teleportation (no transition)
+                nonBtn.style.transition = 'none';
+                nonBtn.style.left = `${randomX}px`;
+                nonBtn.style.top = `${randomY}px`;
+                
+                // Random scale
+                const scale = 0.4 + Math.random() * 0.8;
+                nonBtn.style.transform = `scale(${scale})`;
+                
+                // Create teleport IN effect at new position after a tiny delay
+                setTimeout(() => {
+                    createTeleportEffect(randomX, randomY);
+                }, 10);
+                
+                // Show message 40% of the time
+                if (Math.random() > 0.6) {
+                    const messages = [
+                        "TÉLÉPORTATION! ⚡",
+                        "POOF! Disparu! ✨",
+                        "Où suis-je? 😵",
+                        "Trop rapide! 🚀",
+                        "Téléporté! 🔮",
+                        "Haha! Impossible! 😈",
+                        "Essaie encore! 💨",
+                        "Tu me cherches? 👀",
+                        "Bip bip! Téléporté! 🌀",
+                        "Disparu comme par magie! 🪄"
+                    ];
+                    message.textContent = messages[Math.floor(Math.random() * messages.length)];
+                    message.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        if (!isCelebrating) {
+                            message.style.display = 'none';
+                        }
+                    }, 800);
+                }
+                
+                // Visual effect
+                nonBtn.style.boxShadow = '0 0 0 10px rgba(255, 255, 255, 0.9), 0 25px 50px rgba(255, 92, 141, 0.9)';
+                setTimeout(() => {
+                    nonBtn.style.boxShadow = '0 8px 20px rgba(255, 92, 141, 0.4)';
+                }, 100);
+            }
             
-            // Faire bouger le bouton Non PARTOUT quand la souris s'approche
+            // Create teleportation effect
+            function createTeleportEffect(x, y) {
+                const teleport = document.createElement('div');
+                teleport.innerHTML = '🌀';
+                teleport.style.position = 'fixed';
+                teleport.style.left = `${x + nonBtn.offsetWidth/2 - 20}px`;
+                teleport.style.top = `${y + nonBtn.offsetHeight/2 - 20}px`;
+                teleport.style.fontSize = '40px';
+                teleport.style.zIndex = '99';
+                teleport.style.opacity = '0';
+                teleport.style.transform = 'scale(0)';
+                teleport.style.pointerEvents = 'none';
+                document.body.appendChild(teleport);
+                
+                // Teleport animation
+                teleport.animate([
+                    { transform: 'scale(0) rotate(0deg)', opacity: 0 },
+                    { transform: 'scale(2.5) rotate(360deg)', opacity: 0.9 },
+                    { transform: 'scale(0) rotate(720deg)', opacity: 0 }
+                ], {
+                    duration: 400,
+                    easing: 'cubic-bezier(0.68, -0.55, 0.27, 1.55)'
+                });
+                
+                setTimeout(() => teleport.remove(), 400);
+            }
+            
+            // Make Non button TELEPORT when mouse approaches
             document.addEventListener('mousemove', function(event) {
                 if (isCelebrating) return;
-                
-                const now = Date.now();
-                if (now - lastMoveTime < 70) return;
                 
                 const btnRect = nonBtn.getBoundingClientRect();
                 const btnCenterX = btnRect.left + btnRect.width / 2;
@@ -424,152 +515,50 @@
                     Math.pow(event.clientY - btnCenterY, 2)
                 );
                 
-                // Si la souris est à moins de 100px, ÉCHAPPE VITE!
-                if (distance < 100) {
-                    lastMoveTime = now;
-                    
-                    // Passer en position FIXED pour bouger partout
-                    if (!isNonFixed) {
-                        nonBtn.style.position = 'fixed';
-                        nonBtn.style.zIndex = '100';
-                        isNonFixed = true;
-                    }
-                    
-                    // Calculer la direction d'échappement
-                    const angle = Math.atan2(btnCenterY - event.clientY, btnCenterX - event.clientX);
-                    
-                    // Distance d'échappement aléatoire
-                    const escapeDistance = 120 + Math.random() * 180;
-                    
-                    // Nouvelle position - N'IMPORTE OÙ sur la page!
-                    let newX = btnCenterX + Math.cos(angle) * escapeDistance;
-                    let newY = btnCenterY + Math.sin(angle) * escapeDistance;
-                    
-                    // Garder dans les limites de la fenêtre
-                    const padding = 40;
-                    newX = Math.max(padding, Math.min(newX, window.innerWidth - nonBtn.offsetWidth - padding));
-                    newY = Math.max(padding, Math.min(newY, window.innerHeight - nonBtn.offsetHeight - padding));
-                    
-                    // MOUVEMENT INSTANTANÉ
-                    nonBtn.style.left = `${newX}px`;
-                    nonBtn.style.top = `${newY}px`;
-                    nonBtn.style.transform = 'translate(0, 0)';
-                    
-                    // Afficher un message
-                    if (Math.random() > 0.6) {
-                        const messages = [
-                            "Trop rapide! ⚡",
-                            "Raté! 😆",
-                            "Pas si vite! 🏃‍♂️",
-                            "Haha! 😈",
-                            "Essaie encore! 💨",
-                            "Presque! 🙈",
-                            "Impossible à attraper! 🚀",
-                            "Il court partout! 🌪️"
-                        ];
-                        message.textContent = messages[Math.floor(Math.random() * messages.length)];
-                        message.style.display = 'block';
-                        
-                        setTimeout(() => {
-                            if (!isCelebrating) {
-                                message.style.display = 'none';
-                            }
-                        }, 1000);
-                    }
-                    
-                    // Effet visuel
-                    nonBtn.style.boxShadow = '0 0 0 4px rgba(255, 255, 255, 0.9), 0 10px 25px rgba(255, 92, 141, 0.6)';
-                    setTimeout(() => {
-                        nonBtn.style.boxShadow = '0 8px 20px rgba(255, 92, 141, 0.4)';
-                    }, 100);
-                    
-                    // Téléportation parfois
-                    if (Math.random() > 0.8) {
-                        setTimeout(() => {
-                            // Position aléatoire
-                            const randomX = Math.random() * (window.innerWidth - nonBtn.offsetWidth - 80) + 40;
-                            const randomY = Math.random() * (window.innerHeight - nonBtn.offsetHeight - 80) + 40;
-                            
-                            nonBtn.style.left = `${randomX}px`;
-                            nonBtn.style.top = `${randomY}px`;
-                            
-                            // Effet de téléportation
-                            const teleport = document.createElement('div');
-                            teleport.innerHTML = '🌀';
-                            teleport.style.position = 'fixed';
-                            teleport.style.left = `${randomX}px`;
-                            teleport.style.top = `${randomY}px`;
-                            teleport.style.fontSize = '40px';
-                            teleport.style.zIndex = '99';
-                            teleport.style.opacity = '0';
-                            teleport.style.transform = 'scale(0)';
-                            document.body.appendChild(teleport);
-                            
-                            teleport.animate([
-                                { transform: 'scale(0)', opacity: 0 },
-                                { transform: 'scale(2)', opacity: 0.8 },
-                                { transform: 'scale(0)', opacity: 0 }
-                            ], {
-                                duration: 500,
-                                easing: 'ease-out'
-                            });
-                            
-                            setTimeout(() => teleport.remove(), 500);
-                        }, 50);
-                    }
-                    
-                    // Effet de scale
-                    if (Math.random() > 0.4) {
-                        const scale = 0.7 + Math.random() * 0.4;
-                        nonBtn.style.transform = `scale(${scale})`;
-                    }
+                // SUPER SENSITIVE - teleports from 180px away
+                if (distance < 180) {
+                    teleportButton();
                 }
             });
             
-            // Échappe aussi si la souris entre sur le bouton
+            // Teleport when mouse enters button
             nonBtn.addEventListener('mouseenter', function(event) {
                 if (!isCelebrating) {
-                    const fakeEvent = new MouseEvent('mousemove', {
-                        clientX: event.clientX,
-                        clientY: event.clientY
-                    });
-                    document.dispatchEvent(fakeEvent);
+                    teleportButton();
                 }
             });
             
-            // Essayer de cliquer sur le bouton
+            // Try to click the button - makes it TELEPORT FAR away
             nonBtn.addEventListener('mousedown', function(event) {
                 event.preventDefault();
+                event.stopPropagation();
                 
-                const fakeEvent = new MouseEvent('mousemove', {
-                    clientX: event.clientX + 200,
-                    clientY: event.clientY + 200
-                });
-                document.dispatchEvent(fakeEvent);
+                // Create multiple teleport effects
+                for(let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        teleportButton();
+                    }, i * 50);
+                }
                 
-                message.textContent = "Haha! Presque réussi! Mais NON! 😅";
+                message.textContent = "Presque! Mais téléporté! 🌀";
                 message.style.display = 'block';
-                
-                // Effet de saut
-                nonBtn.style.transform += ' translateY(-25px)';
-                setTimeout(() => {
-                    nonBtn.style.transform = nonBtn.style.transform.replace('translateY(-25px)', '');
-                }, 200);
             });
             
-            // Quand OUI est cliqué
+            // Auto-teleport button every 0.8-1.5 seconds to keep it active
+            setInterval(() => {
+                if (!isCelebrating && Math.random() > 0.2) {
+                    teleportButton();
+                }
+            }, Math.random() * 700 + 800);
+            
+            // When OUI is clicked
             ouiBtn.addEventListener('click', function() {
                 isCelebrating = true;
                 
-                // Retirer les écouteurs d'événements
-                document.removeEventListener('mousemove', arguments.callee);
-                
-                // Cacher les boutons et message
                 ouiBtn.style.display = 'none';
                 nonBtn.style.display = 'none';
                 message.style.display = 'none';
                 
-                // Changer le titre "Question pour toi" → "YAY! ✨"
                 mainTitle.style.opacity = '0';
                 mainTitle.style.transform = 'translateY(-20px)';
                 
@@ -578,35 +567,31 @@
                     mainTitle.style.opacity = '1';
                     mainTitle.style.transform = 'translateY(0)';
                     
-                    // Animation de disparition de la question
                     questionBox.style.opacity = '0';
                     questionBox.style.transform = 'translateY(-20px)';
                     
                     setTimeout(() => {
-                        // Cacher la question
                         questionBox.style.display = 'none';
-                        
-                        // Afficher la célébration
                         celebrationContainer.style.display = 'block';
                         
-                        // Faire apparaître le message final après 1 seconde
+                        gifRestartInterval = setInterval(restartGif, 2800);
+                        setTimeout(() => restartGif(), 100);
+                        
                         setTimeout(() => {
                             finalMessage.style.opacity = '1';
                             finalMessage.style.transform = 'translateY(0)';
                         }, 1000);
                         
-                        // Créer des confettis
-                        for (let i = 0; i < 120; i++) {
+                        // Create confetti
+                        for (let i = 0; i < 250; i++) {
                             setTimeout(() => {
                                 createConfetti();
-                            }, i * 10);
+                            }, i * 2);
                         }
                         
-                        // Changer le background
                         document.body.style.background = 'linear-gradient(135deg, #ff9ec0 0%, #a29bfe 33%, #74b9ff 66%, #ffd166 100%)';
                         document.body.style.animation = 'rainbowBG 10s infinite linear';
                         
-                        // Ajouter l'animation arc-en-ciel
                         const style = document.createElement('style');
                         style.textContent = `
                             @keyframes rainbowBG {
@@ -619,10 +604,10 @@
                 }, 500);
             });
             
-            // Créer des confettis
+            // Create confetti
             function createConfetti() {
                 const confetti = document.createElement('div');
-                const emojis = ['🎉', '✨', '🎊', '🥳', '💖', '🌟', '😊', '💕'];
+                const emojis = ['🎉', '✨', '🎊', '🥳', '💖', '🌟', '😊', '💕', '🌀', '⚡'];
                 confetti.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
                 confetti.style.position = 'fixed';
                 confetti.style.fontSize = (Math.random() * 30 + 15) + 'px';
@@ -633,7 +618,7 @@
                 
                 document.body.appendChild(confetti);
                 
-                const duration = Math.random() * 1500 + 800;
+                const duration = Math.random() * 800 + 300;
                 const endX = (Math.random() * 300 - 150) + 'px';
                 
                 confetti.animate([
@@ -647,17 +632,16 @@
                 setTimeout(() => confetti.remove(), duration);
             }
             
-            // Gérer le redimensionnement de la fenêtre
-            window.addEventListener('resize', function() {
-                if (!isCelebrating && !isNonFixed) {
-                    // Re-positionner Non si ce n'est pas en mode fixed
-                    positionNonButtonInitially();
-                }
-            });
-            
-            // Message initial
-            message.textContent = "Essaie de cliquer sur 'Non'... si tu peux! 😈";
+            // Initial message
+            message.textContent = "Essaie d'attraper le bouton 'Non'... Bonne chance! 😈";
             message.style.display = 'block';
+            
+            // Initial teleport after 0.5 seconds
+            setTimeout(() => {
+                if (!isCelebrating) {
+                    teleportButton();
+                }
+            }, 500);
         });
     </script>
 </body>
