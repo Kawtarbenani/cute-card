@@ -23,7 +23,6 @@
             padding: 40px 20px;
             position: relative;
             cursor: default;
-            overflow-x: hidden;
             overflow-y: auto;
         }
         
@@ -148,15 +147,16 @@
             border-radius: 60px;
             cursor: pointer;
             box-shadow: 0 8px 20px rgba(255, 92, 141, 0.4);
-            position: relative;
+            position: relative; /* RELATIVE AU DÉBUT */
             z-index: 20;
             font-weight: 800;
             display: flex;
             align-items: center;
             gap: 10px;
-            order: 2;
+            transition: none !important;
+            animation: none !important;
+            order: 2; /* EN DESSOUS DE OUI */
             margin-top: 10px;
-            transition: none !important; /* NO TRANSITION FOR INSTANT MOVEMENT */
         }
         
         .non-btn .shy-text {
@@ -218,16 +218,11 @@
             to { transform: translateY(-15px); }
         }
         
-        .celebration-gif-container {
-            position: relative;
-            width: 100%;
-            max-width: 320px;
-            margin: 10px auto;
-        }
-        
         .celebration-gif {
             width: 100%;
+            max-width: 320px;
             border-radius: 20px;
+            margin: 10px 0;
             border: 6px solid #ffafcc;
             box-shadow: 0 15px 30px rgba(255, 107, 157, 0.3);
         }
@@ -302,7 +297,7 @@
                 font-size: 2.2rem;
             }
             
-            .celebration-gif-container {
+            .celebration-gif {
                 max-width: 280px;
             }
             
@@ -315,21 +310,18 @@
             }
         }
         
-        /* Make sure page is scrollable but not horizontally */
+        /* Make sure page is scrollable */
         html {
             overflow-y: scroll;
-            overflow-x: hidden;
-            width: 100%;
         }
         
         body {
             min-height: 120vh;
-            width: 100%;
-            overflow-x: hidden;
         }
     </style>
 </head>
 <body>
+    <!-- Cute emojis in corners -->
     <div class="cute-emoji emoji-1">🌸</div>
     <div class="cute-emoji emoji-2">✨</div>
     <div class="cute-emoji emoji-3">💖</div>
@@ -337,8 +329,10 @@
     
     <div class="container">
         <div class="card">
+            <!-- Title that will change -->
             <h1 class="title" id="mainTitle">Question pour toi ✨</h1>
             
+            <!-- Question Section (will be replaced) -->
             <div class="question-box" id="questionBox">
                 <p class="question" id="questionText">
                     <span class="sofia-name">Sofia</span><br>
@@ -347,21 +341,22 @@
                 </p>
             </div>
             
+            <!-- Celebration Section (hidden initially) -->
             <div class="celebration-container" id="celebrationContainer">
                 <div class="yay-text">🎉 YAY! À vendredi! 🎉</div>
-                
-                <div class="celebration-gif-container">
-                    <img class="celebration-gif" id="celebrationGif" src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Man Celebrating">
-                </div>
-                
+                <!-- GIF d'un homme qui célèbre -->
+                <img class="celebration-gif" src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Man Celebrating">
+                <!-- Message final qui apparaîtra -->
                 <div class="final-message" id="finalMessage">✨ On se voit vendredi! ✨</div>
             </div>
             
             <div class="buttons-wrapper">
+                <!-- OUI est AU-DESSUS -->
                 <button class="oui-btn" id="ouiBtn">
                     <i class="fas fa-heart"></i> OUI !
                 </button>
                 
+                <!-- NON est EN DESSOUS -->
                 <button class="non-btn" id="nonBtn">
                     <i class="fas fa-grin-tongue-squint"></i> Non 
                     <span class="shy-text">(shy 😈)</span>
@@ -376,6 +371,7 @@
         </div>
     </div>
 
+    <!-- Add some extra space at bottom for scrolling -->
     <div style="height: 200px; width: 100%;"></div>
 
     <script>
@@ -384,82 +380,40 @@
             const nonBtn = document.getElementById('nonBtn');
             const message = document.getElementById('message');
             const questionBox = document.getElementById('questionBox');
+            const questionText = document.getElementById('questionText');
             const celebrationContainer = document.getElementById('celebrationContainer');
             const mainTitle = document.getElementById('mainTitle');
             const finalMessage = document.getElementById('finalMessage');
-            const celebrationGif = document.getElementById('celebrationGif');
             
+            let lastMoveTime = 0;
             let isCelebrating = false;
             let isNonFixed = false;
-            let gifRestartInterval = null;
-            let lastPosition = { x: 0, y: 0 };
             
-            // Restart GIF function
-            function restartGif() {
-                const gifSrc = celebrationGif.src;
-                celebrationGif.src = "";
-                celebrationGif.src = gifSrc;
+            // Position initiale - S'assurer que Non est BIEN en dessous de Oui
+            function positionNonButtonInitially() {
+                // Réinitialiser la position du bouton Non
+                nonBtn.style.position = 'relative';
+                nonBtn.style.left = '0';
+                nonBtn.style.top = '0';
+                nonBtn.style.transform = 'translate(0, 0)';
+                nonBtn.style.zIndex = '20';
+                
+                // Forcer le reflow pour s'assurer que les positions sont correctes
+                void nonBtn.offsetWidth;
+                
+                console.log('Non button positioned BELOW Oui');
+                isNonFixed = false;
             }
             
-            // Function to move button to random position
-            function moveButtonRandomly() {
-                if (isCelebrating) return;
-                
-                // ALWAYS move to fixed position
-                if (!isNonFixed) {
-                    nonBtn.style.position = 'fixed';
-                    nonBtn.style.zIndex = '100';
-                    isNonFixed = true;
-                }
-                
-                // Random position
-                const randomX = Math.random() * (window.innerWidth - nonBtn.offsetWidth - 80) + 40;
-                const randomY = Math.random() * (window.innerHeight - nonBtn.offsetHeight - 80) + 40;
-                
-                // INSTANT movement
-                nonBtn.style.transition = 'none';
-                nonBtn.style.left = `${randomX}px`;
-                nonBtn.style.top = `${randomY}px`;
-                lastPosition = { x: randomX, y: randomY };
-                
-                // Show message 30% of the time
-                if (Math.random() > 0.7) {
-                    const messages = [
-                        "Trop rapide! ⚡",
-                        "Raté! 😆",
-                        "Pas si vite! 🏃‍♂️",
-                        "Haha! 😈",
-                        "Essaie encore! 💨",
-                        "Presque! 🙈",
-                        "Impossible! 🚀",
-                        "Il fuit! 🌪️",
-                        "Tu m'as presque eu! 😅",
-                        "Trop lent! 🐢"
-                    ];
-                    message.textContent = messages[Math.floor(Math.random() * messages.length)];
-                    message.style.display = 'block';
-                    
-                    setTimeout(() => {
-                        if (!isCelebrating) {
-                            message.style.display = 'none';
-                        }
-                    }, 600);
-                }
-                
-                // Visual effect
-                nonBtn.style.boxShadow = '0 0 0 8px rgba(255, 255, 255, 0.9), 0 20px 40px rgba(255, 92, 141, 0.8)';
-                setTimeout(() => {
-                    nonBtn.style.boxShadow = '0 8px 20px rgba(255, 92, 141, 0.4)';
-                }, 50);
-                
-                // Scale effect
-                const scale = 0.5 + Math.random() * 0.6;
-                nonBtn.style.transform = `scale(${scale})`;
-            }
+            // Position initiale
+            setTimeout(positionNonButtonInitially, 100);
             
-            // Make Non button move INSTANTLY when mouse approaches
+            // Faire bouger le bouton Non PARTOUT quand la souris s'approche
             document.addEventListener('mousemove', function(event) {
                 if (isCelebrating) return;
+                
+                const now = Date.now();
+                if (now - lastMoveTime < 70) return;
                 
                 const btnRect = nonBtn.getBoundingClientRect();
                 const btnCenterX = btnRect.left + btnRect.width / 2;
@@ -470,86 +424,152 @@
                     Math.pow(event.clientY - btnCenterY, 2)
                 );
                 
-                // EXTREME sensitivity - moves from FAR away
-                if (distance < 200) { // Reacts from 200px away
-                    moveButtonRandomly();
-                }
-            });
-            
-            // Escape also when mouse enters button
-            nonBtn.addEventListener('mouseenter', function(event) {
-                if (!isCelebrating) {
-                    // Move button to opposite side of mouse
-                    const newX = event.clientX > window.innerWidth/2 ? 
-                        Math.random() * (window.innerWidth/3) : 
-                        window.innerWidth - nonBtn.offsetWidth - Math.random() * 100;
+                // Si la souris est à moins de 100px, ÉCHAPPE VITE!
+                if (distance < 100) {
+                    lastMoveTime = now;
                     
-                    const newY = event.clientY > window.innerHeight/2 ? 
-                        Math.random() * (window.innerHeight/3) : 
-                        window.innerHeight - nonBtn.offsetHeight - Math.random() * 100;
-                    
+                    // Passer en position FIXED pour bouger partout
                     if (!isNonFixed) {
                         nonBtn.style.position = 'fixed';
                         nonBtn.style.zIndex = '100';
                         isNonFixed = true;
                     }
                     
-                    nonBtn.style.transition = 'none';
+                    // Calculer la direction d'échappement
+                    const angle = Math.atan2(btnCenterY - event.clientY, btnCenterX - event.clientX);
+                    
+                    // Distance d'échappement aléatoire
+                    const escapeDistance = 120 + Math.random() * 180;
+                    
+                    // Nouvelle position - N'IMPORTE OÙ sur la page!
+                    let newX = btnCenterX + Math.cos(angle) * escapeDistance;
+                    let newY = btnCenterY + Math.sin(angle) * escapeDistance;
+                    
+                    // Garder dans les limites de la fenêtre
+                    const padding = 40;
+                    newX = Math.max(padding, Math.min(newX, window.innerWidth - nonBtn.offsetWidth - padding));
+                    newY = Math.max(padding, Math.min(newY, window.innerHeight - nonBtn.offsetHeight - padding));
+                    
+                    // MOUVEMENT INSTANTANÉ
                     nonBtn.style.left = `${newX}px`;
                     nonBtn.style.top = `${newY}px`;
+                    nonBtn.style.transform = 'translate(0, 0)';
+                    
+                    // Afficher un message
+                    if (Math.random() > 0.6) {
+                        const messages = [
+                            "Trop rapide! ⚡",
+                            "Raté! 😆",
+                            "Pas si vite! 🏃‍♂️",
+                            "Haha! 😈",
+                            "Essaie encore! 💨",
+                            "Presque! 🙈",
+                            "Impossible à attraper! 🚀",
+                            "Il court partout! 🌪️"
+                        ];
+                        message.textContent = messages[Math.floor(Math.random() * messages.length)];
+                        message.style.display = 'block';
+                        
+                        setTimeout(() => {
+                            if (!isCelebrating) {
+                                message.style.display = 'none';
+                            }
+                        }, 1000);
+                    }
+                    
+                    // Effet visuel
+                    nonBtn.style.boxShadow = '0 0 0 4px rgba(255, 255, 255, 0.9), 0 10px 25px rgba(255, 92, 141, 0.6)';
+                    setTimeout(() => {
+                        nonBtn.style.boxShadow = '0 8px 20px rgba(255, 92, 141, 0.4)';
+                    }, 100);
+                    
+                    // Téléportation parfois
+                    if (Math.random() > 0.8) {
+                        setTimeout(() => {
+                            // Position aléatoire
+                            const randomX = Math.random() * (window.innerWidth - nonBtn.offsetWidth - 80) + 40;
+                            const randomY = Math.random() * (window.innerHeight - nonBtn.offsetHeight - 80) + 40;
+                            
+                            nonBtn.style.left = `${randomX}px`;
+                            nonBtn.style.top = `${randomY}px`;
+                            
+                            // Effet de téléportation
+                            const teleport = document.createElement('div');
+                            teleport.innerHTML = '🌀';
+                            teleport.style.position = 'fixed';
+                            teleport.style.left = `${randomX}px`;
+                            teleport.style.top = `${randomY}px`;
+                            teleport.style.fontSize = '40px';
+                            teleport.style.zIndex = '99';
+                            teleport.style.opacity = '0';
+                            teleport.style.transform = 'scale(0)';
+                            document.body.appendChild(teleport);
+                            
+                            teleport.animate([
+                                { transform: 'scale(0)', opacity: 0 },
+                                { transform: 'scale(2)', opacity: 0.8 },
+                                { transform: 'scale(0)', opacity: 0 }
+                            ], {
+                                duration: 500,
+                                easing: 'ease-out'
+                            });
+                            
+                            setTimeout(() => teleport.remove(), 500);
+                        }, 50);
+                    }
+                    
+                    // Effet de scale
+                    if (Math.random() > 0.4) {
+                        const scale = 0.7 + Math.random() * 0.4;
+                        nonBtn.style.transform = `scale(${scale})`;
+                    }
                 }
             });
             
-            // Try to click the button - makes it JUMP
+            // Échappe aussi si la souris entre sur le bouton
+            nonBtn.addEventListener('mouseenter', function(event) {
+                if (!isCelebrating) {
+                    const fakeEvent = new MouseEvent('mousemove', {
+                        clientX: event.clientX,
+                        clientY: event.clientY
+                    });
+                    document.dispatchEvent(fakeEvent);
+                }
+            });
+            
+            // Essayer de cliquer sur le bouton
             nonBtn.addEventListener('mousedown', function(event) {
                 event.preventDefault();
-                event.stopPropagation();
                 
-                // Jump FAR to opposite corner
-                const jumpX = Math.random() > 0.5 ? 
-                    Math.random() * 100 + 20 : 
-                    window.innerWidth - nonBtn.offsetWidth - Math.random() * 100 - 20;
-                
-                const jumpY = Math.random() > 0.5 ? 
-                    Math.random() * 100 + 20 : 
-                    window.innerHeight - nonBtn.offsetHeight - Math.random() * 100 - 20;
-                
-                if (!isNonFixed) {
-                    nonBtn.style.position = 'fixed';
-                    nonBtn.style.zIndex = '100';
-                    isNonFixed = true;
-                }
-                
-                nonBtn.style.transition = 'none';
-                nonBtn.style.left = `${jumpX}px`;
-                nonBtn.style.top = `${jumpY}px`;
-                nonBtn.style.transform = 'scale(0.7)';
+                const fakeEvent = new MouseEvent('mousemove', {
+                    clientX: event.clientX + 200,
+                    clientY: event.clientY + 200
+                });
+                document.dispatchEvent(fakeEvent);
                 
                 message.textContent = "Haha! Presque réussi! Mais NON! 😅";
                 message.style.display = 'block';
                 
-                // Jump animation
-                nonBtn.style.transform += ' translateY(-50px)';
+                // Effet de saut
+                nonBtn.style.transform += ' translateY(-25px)';
                 setTimeout(() => {
-                    nonBtn.style.transform = nonBtn.style.transform.replace('translateY(-50px)', '');
-                }, 100);
+                    nonBtn.style.transform = nonBtn.style.transform.replace('translateY(-25px)', '');
+                }, 200);
             });
             
-            // Auto-move button every 1.5 seconds to keep it active
-            setInterval(() => {
-                if (!isCelebrating && Math.random() > 0.3) {
-                    moveButtonRandomly();
-                }
-            }, 1500);
-            
-            // When OUI is clicked
+            // Quand OUI est cliqué
             ouiBtn.addEventListener('click', function() {
                 isCelebrating = true;
                 
+                // Retirer les écouteurs d'événements
+                document.removeEventListener('mousemove', arguments.callee);
+                
+                // Cacher les boutons et message
                 ouiBtn.style.display = 'none';
                 nonBtn.style.display = 'none';
                 message.style.display = 'none';
                 
+                // Changer le titre "Question pour toi" → "YAY! ✨"
                 mainTitle.style.opacity = '0';
                 mainTitle.style.transform = 'translateY(-20px)';
                 
@@ -558,31 +578,35 @@
                     mainTitle.style.opacity = '1';
                     mainTitle.style.transform = 'translateY(0)';
                     
+                    // Animation de disparition de la question
                     questionBox.style.opacity = '0';
                     questionBox.style.transform = 'translateY(-20px)';
                     
                     setTimeout(() => {
+                        // Cacher la question
                         questionBox.style.display = 'none';
+                        
+                        // Afficher la célébration
                         celebrationContainer.style.display = 'block';
                         
-                        gifRestartInterval = setInterval(restartGif, 2800);
-                        setTimeout(() => restartGif(), 100);
-                        
+                        // Faire apparaître le message final après 1 seconde
                         setTimeout(() => {
                             finalMessage.style.opacity = '1';
                             finalMessage.style.transform = 'translateY(0)';
                         }, 1000);
                         
-                        // Create confetti
-                        for (let i = 0; i < 200; i++) {
+                        // Créer des confettis
+                        for (let i = 0; i < 120; i++) {
                             setTimeout(() => {
                                 createConfetti();
-                            }, i * 3);
+                            }, i * 10);
                         }
                         
+                        // Changer le background
                         document.body.style.background = 'linear-gradient(135deg, #ff9ec0 0%, #a29bfe 33%, #74b9ff 66%, #ffd166 100%)';
                         document.body.style.animation = 'rainbowBG 10s infinite linear';
                         
+                        // Ajouter l'animation arc-en-ciel
                         const style = document.createElement('style');
                         style.textContent = `
                             @keyframes rainbowBG {
@@ -595,7 +619,7 @@
                 }, 500);
             });
             
-            // Create confetti
+            // Créer des confettis
             function createConfetti() {
                 const confetti = document.createElement('div');
                 const emojis = ['🎉', '✨', '🎊', '🥳', '💖', '🌟', '😊', '💕'];
@@ -609,7 +633,7 @@
                 
                 document.body.appendChild(confetti);
                 
-                const duration = Math.random() * 1000 + 400;
+                const duration = Math.random() * 1500 + 800;
                 const endX = (Math.random() * 300 - 150) + 'px';
                 
                 confetti.animate([
@@ -623,16 +647,17 @@
                 setTimeout(() => confetti.remove(), duration);
             }
             
-            // Initial message
+            // Gérer le redimensionnement de la fenêtre
+            window.addEventListener('resize', function() {
+                if (!isCelebrating && !isNonFixed) {
+                    // Re-positionner Non si ce n'est pas en mode fixed
+                    positionNonButtonInitially();
+                }
+            });
+            
+            // Message initial
             message.textContent = "Essaie de cliquer sur 'Non'... si tu peux! 😈";
             message.style.display = 'block';
-            
-            // Initial random move after 1 second
-            setTimeout(() => {
-                if (!isCelebrating) {
-                    moveButtonRandomly();
-                }
-            }, 1000);
         });
     </script>
 </body>
