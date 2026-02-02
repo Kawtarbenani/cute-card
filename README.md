@@ -70,6 +70,7 @@
             color: #ff006e;
             margin-bottom: 25px;
             text-shadow: 2px 2px 0 #ffafcc;
+            transition: all 0.5s ease;
         }
         
         .question-box {
@@ -102,15 +103,16 @@
             border: 3px solid #ffafcc;
         }
         
-        .buttons-container {
+        .buttons-wrapper {
             position: relative;
-            margin: 20px 0 60px 0; /* Plus d'espace en bas pour le Non */
-            min-height: 180px;
+            margin: 20px 0 40px 0;
+            min-height: 200px;
             z-index: 10;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            justify-content: center;
+            gap: 30px;
         }
         
         .oui-btn {
@@ -130,24 +132,11 @@
             align-items: center;
             gap: 15px;
             order: 1;
-            margin-bottom: 30px; /* Espace pour le Non en dessous */
         }
         
         .oui-btn:hover {
             transform: scale(1.08);
             box-shadow: 0 15px 30px rgba(76, 217, 100, 0.6);
-        }
-        
-        /* Conteneur pour le bouton Non (pour le positionner initialement) */
-        .non-container {
-            position: relative;
-            width: 100%;
-            height: 100px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 10px;
-            order: 2;
         }
         
         .non-btn {
@@ -159,7 +148,7 @@
             border-radius: 60px;
             cursor: pointer;
             box-shadow: 0 8px 20px rgba(255, 92, 141, 0.4);
-            position: relative; /* Position relative pour commencer */
+            position: relative; /* RELATIVE AU DÉBUT */
             z-index: 20;
             font-weight: 800;
             display: flex;
@@ -167,7 +156,7 @@
             gap: 10px;
             transition: none !important;
             animation: none !important;
-            /* Position initiale DANS le conteneur (en dessous de Oui) */
+            order: 2; /* EN DESSOUS DE OUI */
             margin-top: 10px;
         }
         
@@ -325,7 +314,8 @@
     
     <div class="container">
         <div class="card">
-            <h1 class="title">Question pour toi ✨</h1>
+            <!-- Title that will change -->
+            <h1 class="title" id="mainTitle">Question pour toi ✨</h1>
             
             <!-- Question Section (will be replaced) -->
             <div class="question-box" id="questionBox">
@@ -343,19 +333,17 @@
                 <img class="celebration-gif" src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Man Celebrating">
             </div>
             
-            <div class="buttons-container">
+            <div class="buttons-wrapper">
                 <!-- OUI est AU-DESSUS -->
                 <button class="oui-btn" id="ouiBtn">
                     <i class="fas fa-heart"></i> OUI !
                 </button>
                 
-                <!-- Conteneur pour NON qui sera EN DESSOUS -->
-                <div class="non-container">
-                    <button class="non-btn" id="nonBtn">
-                        <i class="fas fa-grin-tongue-squint"></i> Non 
-                        <span class="shy-text">(shy 😈)</span>
-                    </button>
-                </div>
+                <!-- NON est EN DESSOUS -->
+                <button class="non-btn" id="nonBtn">
+                    <i class="fas fa-grin-tongue-squint"></i> Non 
+                    <span class="shy-text">(shy 😈)</span>
+                </button>
             </div>
             
             <div class="message" id="message"></div>
@@ -377,29 +365,23 @@
             const questionBox = document.getElementById('questionBox');
             const questionText = document.getElementById('questionText');
             const celebrationContainer = document.getElementById('celebrationContainer');
+            const mainTitle = document.getElementById('mainTitle');
             
             let lastMoveTime = 0;
             let isCelebrating = false;
-            let isNonFixed = false; // Pour suivre si Non est en position fixed
+            let isNonFixed = false;
             
-            // Position initiale - Non est BIEN EN DESSOUS de Oui
+            // Position initiale - S'assurer que Non est BIEN en dessous de Oui
             function positionNonButtonInitially() {
-                // S'assurer que Non est EN DESSOUS de Oui
-                const ouiBtnRect = ouiBtn.getBoundingClientRect();
-                const nonContainer = document.querySelector('.non-container');
-                const nonContainerRect = nonContainer.getBoundingClientRect();
-                
-                // Calculer la position pour que Non soit 80px en dessous de Oui
-                const targetTop = ouiBtnRect.bottom + 80;
-                
-                // Ajuster la position du conteneur
-                nonContainer.style.marginTop = `${targetTop - nonContainerRect.top}px`;
-                
-                // Positionner le bouton Non dans son conteneur
+                // Réinitialiser la position du bouton Non
                 nonBtn.style.position = 'relative';
                 nonBtn.style.left = '0';
                 nonBtn.style.top = '0';
-                nonBtn.style.transform = 'none';
+                nonBtn.style.transform = 'translate(0, 0)';
+                nonBtn.style.zIndex = '20';
+                
+                // Forcer le reflow pour s'assurer que les positions sont correctes
+                void nonBtn.offsetWidth;
                 
                 console.log('Non button positioned BELOW Oui');
                 isNonFixed = false;
@@ -424,8 +406,8 @@
                     Math.pow(event.clientY - btnCenterY, 2)
                 );
                 
-                // Si la souris est à moins de 90px, ÉCHAPPE VITE!
-                if (distance < 90) {
+                // Si la souris est à moins de 100px, ÉCHAPPE VITE!
+                if (distance < 100) {
                     lastMoveTime = now;
                     
                     // Passer en position FIXED pour bouger partout
@@ -569,37 +551,78 @@
                 nonBtn.style.display = 'none';
                 message.style.display = 'none';
                 
-                // Animation de disparition de la question
-                questionBox.style.opacity = '0';
-                questionBox.style.transform = 'translateY(-20px)';
+                // Changer le titre "Question pour toi" → "YAY! ✨"
+                mainTitle.style.opacity = '0';
+                mainTitle.style.transform = 'translateY(-20px)';
                 
                 setTimeout(() => {
-                    // Cacher la question
-                    questionBox.style.display = 'none';
+                    mainTitle.textContent = 'YAY! ✨';
+                    mainTitle.style.opacity = '1';
+                    mainTitle.style.transform = 'translateY(0)';
                     
-                    // Afficher la célébration
-                    celebrationContainer.style.display = 'block';
+                    // Animation de disparition de la question
+                    questionBox.style.opacity = '0';
+                    questionBox.style.transform = 'translateY(-20px)';
                     
-                    // Créer des confettis
-                    for (let i = 0; i < 120; i++) {
-                        setTimeout(() => {
-                            createConfetti();
-                        }, i * 10);
-                    }
-                    
-                    // Changer le background
-                    document.body.style.background = 'linear-gradient(135deg, #ff9ec0 0%, #a29bfe 33%, #74b9ff 66%, #ffd166 100%)';
-                    document.body.style.animation = 'rainbowBG 10s infinite linear';
-                    
-                    // Ajouter l'animation arc-en-ciel
-                    const style = document.createElement('style');
-                    style.textContent = `
-                        @keyframes rainbowBG {
-                            0% { filter: hue-rotate(0deg); }
-                            100% { filter: hue-rotate(360deg); }
+                    setTimeout(() => {
+                        // Cacher la question
+                        questionBox.style.display = 'none';
+                        
+                        // Afficher la célébration (brièvement)
+                        celebrationContainer.style.display = 'block';
+                        
+                        // Créer des confettis
+                        for (let i = 0; i < 120; i++) {
+                            setTimeout(() => {
+                                createConfetti();
+                            }, i * 10);
                         }
-                    `;
-                    document.head.appendChild(style);
+                        
+                        // Changer le background
+                        document.body.style.background = 'linear-gradient(135deg, #ff9ec0 0%, #a29bfe 33%, #74b9ff 66%, #ffd166 100%)';
+                        document.body.style.animation = 'rainbowBG 10s infinite linear';
+                        
+                        // Ajouter l'animation arc-en-ciel
+                        const style = document.createElement('style');
+                        style.textContent = `
+                            @keyframes rainbowBG {
+                                0% { filter: hue-rotate(0deg); }
+                                100% { filter: hue-rotate(360deg); }
+                            }
+                        `;
+                        document.head.appendChild(style);
+                        
+                        // Faire disparaître le "YAY! À vendredi!" après 3 secondes
+                        setTimeout(() => {
+                            celebrationContainer.style.opacity = '0';
+                            celebrationContainer.style.transform = 'translateY(20px)';
+                            celebrationContainer.style.transition = 'all 0.5s ease';
+                            
+                            // Montrer un message final
+                            setTimeout(() => {
+                                const finalMessage = document.createElement('div');
+                                finalMessage.innerHTML = '✨ On se voit vendredi! ✨';
+                                finalMessage.style.position = 'relative';
+                                finalMessage.style.fontSize = '2rem';
+                                finalMessage.style.color = '#ff006e';
+                                finalMessage.style.fontWeight = '900';
+                                finalMessage.style.marginTop = '30px';
+                                finalMessage.style.opacity = '0';
+                                finalMessage.style.transform = 'translateY(20px)';
+                                finalMessage.style.textAlign = 'center';
+                                finalMessage.style.fontFamily = "'Comic Neue', cursive";
+                                
+                                card.insertBefore(finalMessage, celebrationContainer);
+                                
+                                // Animer le message final
+                                setTimeout(() => {
+                                    finalMessage.style.opacity = '1';
+                                    finalMessage.style.transform = 'translateY(0)';
+                                    finalMessage.style.transition = 'all 0.5s ease';
+                                }, 100);
+                            }, 500);
+                        }, 3000);
+                    }, 500);
                 }, 500);
             });
             
