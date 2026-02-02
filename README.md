@@ -1,10 +1,9 @@
-# cute-card
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pour Sofia</title>
+    <title></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -336,7 +335,7 @@
     <div class="container">
         <div class="card">
             <!-- Title that will change -->
-            <h1 class="title" id="mainTitle">Question pour toi ✨</h1>
+            <h1 class="title" id="mainTitle">✨</h1>
             
             <!-- Question Section (will be replaced) -->
             <div class="question-box" id="questionBox">
@@ -353,7 +352,7 @@
                 
                 <!-- Conteneur pour le GIF qui se relance -->
                 <div class="celebration-gif-container">
-                    <img class="celebration-gif" id="celebrationGif" src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Man Celebrating">
+                    <img class="celebration-gif" id="celebrationGif" src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Celebration">
                 </div>
                 
                 <!-- Message final qui apparaîtra -->
@@ -406,9 +405,9 @@
                 // Technique pour forcer le redémarrage du GIF
                 const gifSrc = celebrationGif.src;
                 celebrationGif.src = "";
-                celebrationGif.src = gifSrc;
-                
-                console.log('GIF restarted');
+                setTimeout(() => {
+                    celebrationGif.src = gifSrc;
+                }, 50);
             }
             
             // Position initiale - S'assurer que Non est BIEN en dessous de Oui
@@ -423,7 +422,6 @@
                 // Forcer le reflow pour s'assurer que les positions sont correctes
                 void nonBtn.offsetWidth;
                 
-                console.log('Non button positioned BELOW Oui');
                 isNonFixed = false;
             }
             
@@ -591,7 +589,7 @@
                 nonBtn.style.display = 'none';
                 message.style.display = 'none';
                 
-                // Changer le titre "Question pour toi" → "YAY! ✨"
+                // Changer le titre "✨" → "YAY! ✨"
                 mainTitle.style.opacity = '0';
                 mainTitle.style.transform = 'translateY(-20px)';
                 
@@ -612,11 +610,8 @@
                         celebrationContainer.style.display = 'block';
                         
                         // Démarrer le redémarrage automatique du GIF
-                        // Le GIF dure environ 3 secondes, on le redémarre toutes les 2.8 secondes
-                        gifRestartInterval = setInterval(restartGif, 2800);
-                        
-                        // Redémarrer le GIF une première fois immédiatement
-                        setTimeout(() => restartGif(), 100);
+                        // Redémarrer toutes les 3 secondes
+                        gifRestartInterval = setInterval(restartGif, 3000);
                         
                         // Faire apparaître le message final après 1 seconde
                         setTimeout(() => {
