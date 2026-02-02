@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cute-Card</title>
+    <title> </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -353,7 +353,7 @@
 </head>
 <body>
     <!-- Cute-Card as NORMAL TEXT at the top -->
-    <div class="cute-card-text">Cute-Card</div>
+    <div class="cute-card-text"></div>
     
     <div class="cute-emoji emoji-1">🌸</div>
     <div class="cute-emoji emoji-2">✨</div>
