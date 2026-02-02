@@ -25,14 +25,14 @@
         }
         
         .container {
-            max-width: 450px;
+            max-width: 500px;
             width: 100%;
         }
         
         .card {
             background: white;
             border-radius: 25px;
-            padding: 35px 25px;
+            padding: 35px 30px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
             text-align: center;
             border: 8px solid #ffafcc;
@@ -60,51 +60,18 @@
         
         .title {
             font-family: 'Comic Neue', cursive;
-            font-size: 2.2rem;
+            font-size: 2rem;
             color: #ff006e;
             margin-bottom: 15px;
             text-shadow: 2px 2px 0 #ffafcc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .title i {
-            font-size: 1.8rem;
-            animation: heartbeat 1.2s infinite;
-            color: #ff6b9d;
-        }
-        
-        @keyframes heartbeat {
-            0% { transform: scale(1); }
-            5% { transform: scale(1.1); }
-            10% { transform: scale(1); }
-            15% { transform: scale(1.1); }
-            20% { transform: scale(1); }
-            100% { transform: scale(1); }
         }
         
         .question-box {
             background: linear-gradient(135deg, #fff5f9 0%, #f0f8ff 100%);
             border-radius: 18px;
             padding: 20px;
-            margin: 15px 0;
+            margin: 20px 0;
             border: 3px dashed #ffafcc;
-            position: relative;
-        }
-        
-        .question-box::before {
-            content: '❓';
-            position: absolute;
-            top: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 1.5rem;
-            background: white;
-            padding: 5px 10px;
-            border-radius: 50%;
-            border: 3px solid #ffafcc;
         }
         
         .question {
@@ -126,7 +93,7 @@
         
         .buttons-playground {
             position: relative;
-            height: 180px;
+            height: 220px; /* More height for better spacing */
             margin: 25px 0;
             background: #f8f9ff;
             border-radius: 18px;
@@ -138,13 +105,13 @@
             background: linear-gradient(135deg, #4cd964 0%, #2ecc71 100%);
             color: white;
             border: none;
-            padding: 16px 40px;
-            font-size: 1.6rem;
+            padding: 18px 45px;
+            font-size: 1.7rem;
             border-radius: 50px;
             cursor: pointer;
             box-shadow: 0 8px 20px rgba(76, 217, 100, 0.4);
             position: absolute;
-            top: 25px;
+            top: 40px; /* More space from top */
             left: 50%;
             transform: translateX(-50%);
             z-index: 2;
@@ -153,6 +120,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            min-width: 180px;
         }
         
         .oui-btn:hover {
@@ -164,13 +132,13 @@
             background: linear-gradient(135deg, #ff8fab 0%, #ff5c8d 100%);
             color: white;
             border: none;
-            padding: 14px 35px;
-            font-size: 1.4rem;
+            padding: 16px 40px;
+            font-size: 1.5rem;
             border-radius: 50px;
             cursor: pointer;
             box-shadow: 0 6px 15px rgba(255, 92, 141, 0.4);
             position: absolute;
-            top: 95px;
+            top: 130px; /* More space between buttons */
             left: 50%;
             transform: translateX(-50%);
             z-index: 3;
@@ -179,6 +147,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            min-width: 200px;
         }
         
         .non-btn .shy-text {
@@ -251,7 +220,7 @@
         
         .cute-emoji {
             position: absolute;
-            font-size: 2rem;
+            font-size: 1.8rem;
             z-index: 1;
             animation: float 3s ease-in-out infinite;
         }
@@ -277,11 +246,7 @@
             }
             
             .title {
-                font-size: 1.9rem;
-            }
-            
-            .title i {
-                font-size: 1.6rem;
+                font-size: 1.8rem;
             }
             
             .question {
@@ -289,18 +254,21 @@
             }
             
             .buttons-playground {
-                height: 160px;
+                height: 200px;
             }
             
             .oui-btn {
-                padding: 14px 30px;
-                font-size: 1.4rem;
+                padding: 16px 35px;
+                font-size: 1.5rem;
+                top: 35px;
+                min-width: 160px;
             }
             
             .non-btn {
-                padding: 12px 25px;
-                font-size: 1.2rem;
-                top: 90px;
+                padding: 14px 30px;
+                font-size: 1.3rem;
+                top: 115px;
+                min-width: 180px;
             }
             
             .yay-text {
@@ -308,7 +276,7 @@
             }
             
             .cute-emoji {
-                font-size: 1.6rem;
+                font-size: 1.5rem;
             }
         }
     </style>
@@ -322,11 +290,7 @@
     
     <div class="container">
         <div class="card">
-            <h1 class="title">
-                <i class="fas fa-star"></i>
-                Question pour toi
-                <i class="fas fa-star"></i>
-            </h1>
+            <h1 class="title">Question pour toi ✨</h1>
             
             <div class="question-box">
                 <p class="question">
@@ -367,13 +331,12 @@
             const celebration = document.getElementById('celebration');
             const playground = document.getElementById('playground');
             
-            let escapeCount = 0;
             let isMoving = false;
             
             // Position the non button initially
             nonBtn.style.position = 'absolute';
             nonBtn.style.left = '50%';
-            nonBtn.style.top = '95px';
+            nonBtn.style.top = '130px';
             nonBtn.style.transform = 'translateX(-50%)';
             
             // Make NON button escape when mouse gets close
@@ -394,14 +357,13 @@
                     Math.pow(mouseY - btnY, 2)
                 );
                 
-                // If mouse is within 70px, escape!
-                if (distance < 70) {
+                // If mouse is within 80px, escape!
+                if (distance < 80) {
                     isMoving = true;
-                    escapeCount++;
                     
                     // Calculate escape direction (away from mouse)
                     const angle = Math.atan2(btnY - mouseY, btnX - mouseX);
-                    const escapeDist = 120 + Math.random() * 80;
+                    const escapeDist = 120 + Math.random() * 100;
                     
                     // New position
                     let newX = btnX + Math.cos(angle) * escapeDist;
@@ -419,44 +381,47 @@
                     nonBtn.style.left = newX + 'px';
                     nonBtn.style.top = newY + 'px';
                     
-                    // Show message
-                    if (escapeCount === 1) {
-                        message.textContent = "Haha! Il s'échappe! 😆";
-                        message.style.display = 'block';
-                    } else if (escapeCount === 3) {
-                        message.textContent = "Il est trop rapide! ⚡";
-                    } else if (escapeCount === 5) {
-                        message.textContent = "Presque... mais non! 😅";
-                    } else if (escapeCount === 7) {
-                        message.textContent = "Ok... clique sur OUI! 🥰";
-                    }
+                    // Show random funny message
+                    const messages = [
+                        "Haha! Il s'échappe! 😆",
+                        "Trop rapide! ⚡",
+                        "Presque... mais non! 😅",
+                        "Il est insaisissable! 🎯",
+                        "Essaie encore! 😄",
+                        "Oh non! Encore raté! 🙈",
+                        "Tu y es presque! 👀",
+                        "Dernière chance! 🎉"
+                    ];
                     
-                    // Make button smaller
-                    const scale = Math.max(0.5, 1 - escapeCount * 0.07);
-                    nonBtn.style.transform = `scale(${scale})`;
+                    message.textContent = messages[Math.floor(Math.random() * messages.length)];
+                    message.style.display = 'block';
+                    
+                    // Make button a little smaller sometimes
+                    if (Math.random() > 0.7) {
+                        const scale = 0.9;
+                        nonBtn.style.transform = `scale(${scale})`;
+                    }
                     
                     // Add wiggle effect
                     setTimeout(() => {
-                        nonBtn.style.transform = `scale(${scale}) rotate(5deg)`;
+                        nonBtn.style.transform = 'rotate(5deg)';
                         setTimeout(() => {
-                            nonBtn.style.transform = `scale(${scale}) rotate(-5deg)`;
+                            nonBtn.style.transform = 'rotate(-5deg)';
                             setTimeout(() => {
-                                nonBtn.style.transform = `scale(${scale}) rotate(0deg)`;
+                                nonBtn.style.transform = 'rotate(0deg)';
                                 isMoving = false;
                             }, 100);
                         }, 100);
                     }, 400);
                     
-                    // After 8 escapes, make button disappear
-                    if (escapeCount >= 8) {
+                    // Sometimes button becomes very small (rare)
+                    if (Math.random() > 0.9) {
                         setTimeout(() => {
-                            nonBtn.style.opacity = '0';
-                            nonBtn.style.transform = 'scale(0.5)';
+                            nonBtn.style.transform = 'scale(0.7)';
                             setTimeout(() => {
-                                nonBtn.style.display = 'none';
-                                message.textContent = "Maintenant clique sur OUI! 🎊";
-                            }, 300);
-                        }, 400);
+                                nonBtn.style.transform = 'scale(1)';
+                            }, 500);
+                        }, 500);
                     }
                 }
             });
