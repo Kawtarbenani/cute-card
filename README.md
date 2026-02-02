@@ -219,11 +219,16 @@
             to { transform: translateY(-15px); }
         }
         
-        .celebration-gif {
+        .celebration-gif-container {
+            position: relative;
             width: 100%;
             max-width: 320px;
+            margin: 10px auto;
+        }
+        
+        .celebration-gif {
+            width: 100%;
             border-radius: 20px;
-            margin: 10px 0;
             border: 6px solid #ffafcc;
             box-shadow: 0 15px 30px rgba(255, 107, 157, 0.3);
         }
@@ -298,7 +303,7 @@
                 font-size: 2.2rem;
             }
             
-            .celebration-gif {
+            .celebration-gif-container {
                 max-width: 280px;
             }
             
@@ -345,8 +350,12 @@
             <!-- Celebration Section (hidden initially) -->
             <div class="celebration-container" id="celebrationContainer">
                 <div class="yay-text">🎉 YAY! À vendredi! 🎉</div>
-                <!-- GIF d'un homme qui célèbre -->
-                <img class="celebration-gif" src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Man Celebrating">
+                
+                <!-- Conteneur pour le GIF qui se relance -->
+                <div class="celebration-gif-container">
+                    <img class="celebration-gif" id="celebrationGif" src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Man Celebrating">
+                </div>
+                
                 <!-- Message final qui apparaîtra -->
                 <div class="final-message" id="finalMessage">✨ On se voit vendredi! ✨</div>
             </div>
@@ -385,10 +394,22 @@
             const celebrationContainer = document.getElementById('celebrationContainer');
             const mainTitle = document.getElementById('mainTitle');
             const finalMessage = document.getElementById('finalMessage');
+            const celebrationGif = document.getElementById('celebrationGif');
             
             let lastMoveTime = 0;
             let isCelebrating = false;
             let isNonFixed = false;
+            let gifRestartInterval = null;
+            
+            // Fonction pour redémarrer le GIF automatiquement
+            function restartGif() {
+                // Technique pour forcer le redémarrage du GIF
+                const gifSrc = celebrationGif.src;
+                celebrationGif.src = "";
+                celebrationGif.src = gifSrc;
+                
+                console.log('GIF restarted');
+            }
             
             // Position initiale - S'assurer que Non est BIEN en dessous de Oui
             function positionNonButtonInitially() {
@@ -590,6 +611,13 @@
                         // Afficher la célébration
                         celebrationContainer.style.display = 'block';
                         
+                        // Démarrer le redémarrage automatique du GIF
+                        // Le GIF dure environ 3 secondes, on le redémarre toutes les 2.8 secondes
+                        gifRestartInterval = setInterval(restartGif, 2800);
+                        
+                        // Redémarrer le GIF une première fois immédiatement
+                        setTimeout(() => restartGif(), 100);
+                        
                         // Faire apparaître le message final après 1 seconde
                         setTimeout(() => {
                             finalMessage.style.opacity = '1';
@@ -653,6 +681,13 @@
                 if (!isCelebrating && !isNonFixed) {
                     // Re-positionner Non si ce n'est pas en mode fixed
                     positionNonButtonInitially();
+                }
+            });
+            
+            // Nettoyer l'intervalle si la page se ferme
+            window.addEventListener('beforeunload', function() {
+                if (gifRestartInterval) {
+                    clearInterval(gifRestartInterval);
                 }
             });
             
