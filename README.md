@@ -228,6 +228,18 @@
             box-shadow: 0 15px 30px rgba(255, 107, 157, 0.3);
         }
         
+        .final-message {
+            font-family: 'Comic Neue', cursive;
+            font-size: 2rem;
+            color: #ff006e;
+            font-weight: 900;
+            margin: 20px 0;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+        
         .footer {
             margin-top: 30px;
             color: #888;
@@ -290,6 +302,10 @@
                 max-width: 280px;
             }
             
+            .final-message {
+                font-size: 1.8rem;
+            }
+            
             .cute-emoji {
                 font-size: 1.6rem;
             }
@@ -331,6 +347,8 @@
                 <div class="yay-text">🎉 YAY! À vendredi! 🎉</div>
                 <!-- GIF d'un homme qui célèbre -->
                 <img class="celebration-gif" src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Man Celebrating">
+                <!-- Message final qui apparaîtra -->
+                <div class="final-message" id="finalMessage">✨ On se voit vendredi! ✨</div>
             </div>
             
             <div class="buttons-wrapper">
@@ -366,6 +384,7 @@
             const questionText = document.getElementById('questionText');
             const celebrationContainer = document.getElementById('celebrationContainer');
             const mainTitle = document.getElementById('mainTitle');
+            const finalMessage = document.getElementById('finalMessage');
             
             let lastMoveTime = 0;
             let isCelebrating = false;
@@ -568,8 +587,14 @@
                         // Cacher la question
                         questionBox.style.display = 'none';
                         
-                        // Afficher la célébration (brièvement)
+                        // Afficher la célébration
                         celebrationContainer.style.display = 'block';
+                        
+                        // Faire apparaître le message final après 1 seconde
+                        setTimeout(() => {
+                            finalMessage.style.opacity = '1';
+                            finalMessage.style.transform = 'translateY(0)';
+                        }, 1000);
                         
                         // Créer des confettis
                         for (let i = 0; i < 120; i++) {
@@ -591,37 +616,6 @@
                             }
                         `;
                         document.head.appendChild(style);
-                        
-                        // Faire disparaître le "YAY! À vendredi!" après 3 secondes
-                        setTimeout(() => {
-                            celebrationContainer.style.opacity = '0';
-                            celebrationContainer.style.transform = 'translateY(20px)';
-                            celebrationContainer.style.transition = 'all 0.5s ease';
-                            
-                            // Montrer un message final
-                            setTimeout(() => {
-                                const finalMessage = document.createElement('div');
-                                finalMessage.innerHTML = '✨ On se voit vendredi! ✨';
-                                finalMessage.style.position = 'relative';
-                                finalMessage.style.fontSize = '2rem';
-                                finalMessage.style.color = '#ff006e';
-                                finalMessage.style.fontWeight = '900';
-                                finalMessage.style.marginTop = '30px';
-                                finalMessage.style.opacity = '0';
-                                finalMessage.style.transform = 'translateY(20px)';
-                                finalMessage.style.textAlign = 'center';
-                                finalMessage.style.fontFamily = "'Comic Neue', cursive";
-                                
-                                card.insertBefore(finalMessage, celebrationContainer);
-                                
-                                // Animer le message final
-                                setTimeout(() => {
-                                    finalMessage.style.opacity = '1';
-                                    finalMessage.style.transform = 'translateY(0)';
-                                    finalMessage.style.transition = 'all 0.5s ease';
-                                }, 100);
-                            }, 500);
-                        }, 3000);
                     }, 500);
                 }, 500);
             });
