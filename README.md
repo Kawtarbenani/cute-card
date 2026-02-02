@@ -3,45 +3,54 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Une décision importante 💗</title>
+  <title>Une petite question</title>
 
   <style>
     body {
       margin: 0;
       height: 100vh;
-      background: radial-gradient(circle at top, #fff1f2, #fdf2f8);
       display: flex;
-      align-items: center;
       justify-content: center;
-      font-family: system-ui, -apple-system, sans-serif;
+      align-items: center;
+      background: linear-gradient(160deg, #fff1f2, #f8fafc);
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
     }
 
-    .scene {
-      width: 380px;
+    .card {
+      width: 360px;
       background: white;
-      border-radius: 30px;
-      padding: 35px;
-      box-shadow: 0 25px 60px rgba(0,0,0,0.15);
+      border-radius: 24px;
+      padding: 28px 26px 30px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.12);
       text-align: center;
     }
 
     h1 {
-      font-size: 22px;
-      margin-bottom: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0 0 8px;
     }
 
-    .text {
-      font-size: 16px;
-      margin-bottom: 20px;
+    .question {
+      font-size: 15px;
+      line-height: 1.4;
+      margin-bottom: 12px;
+      color: #111827;
+    }
+
+    .tease {
+      font-size: 13px;
+      color: #be185d;
+      margin-bottom: 22px;
     }
 
     .meter {
       width: 100%;
-      height: 14px;
+      height: 10px;
       background: #fce7f3;
       border-radius: 999px;
       overflow: hidden;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
     }
 
     .fill {
@@ -51,108 +60,100 @@
       transition: width 0.4s ease;
     }
 
-    .meter-text {
-      font-size: 13px;
-      color: #be185d;
-      margin-bottom: 25px;
-    }
-
     button {
       border: none;
       border-radius: 999px;
-      padding: 14px 30px;
-      font-size: 15px;
+      padding: 11px 22px;
+      font-size: 14px;
       cursor: pointer;
+    }
+
+    #yes {
       background: #fb7185;
       color: white;
-      box-shadow: 0 10px 25px rgba(251,113,133,0.4);
-      transition: transform 0.2s ease;
+      box-shadow: 0 8px 20px rgba(251,113,133,0.35);
+      margin-right: 8px;
     }
 
-    button:hover {
-      transform: translateY(-2px);
-    }
-
-    .secondary {
+    #no {
       background: none;
       color: #9f1239;
-      box-shadow: none;
-      margin-top: 15px;
-      font-size: 14px;
     }
 
     .hidden {
       display: none;
     }
 
+    .success h1 {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .success p {
+      font-size: 14px;
+      margin: 6px 0;
+    }
+
     img {
-      width: 220px;
-      margin-top: 20px;
-      border-radius: 20px;
+      width: 210px;
+      margin-top: 18px;
+      border-radius: 16px;
     }
   </style>
 </head>
 
 <body>
 
-  <!-- MAIN SCENE -->
-  <div class="scene" id="scene">
-    <h1>Sofia 💗</h1>
-    <p class="text" id="text">
-      Est-ce que tu accepterais de sortir avec moi ce vendredi ?
+  <!-- MAIN -->
+  <div class="card" id="card">
+    <h1>Sofia</h1>
+
+    <p class="question">
+      Est-ce que tu serais d’accord pour sortir avec moi ce vendredi ?
+    </p>
+
+    <p class="tease">
+      Tu peux réfléchir… ou essayer « Non » 🙂
     </p>
 
     <div class="meter">
       <div class="fill" id="fill"></div>
     </div>
 
-    <p class="meter-text" id="meterText">
-      Hésitation détectée 😌
-    </p>
-
-    <button id="chooseBtn">Je choisis…</button>
-    <button class="secondary" id="noBtn">Hmm… pas sûr 🙈</button>
+    <button id="yes">Oui</button>
+    <button id="no">Non</button>
   </div>
 
-  <!-- SUCCESS SCENE -->
-  <div class="scene hidden" id="success">
-    <h1>Décision validée ✨</h1>
-    <p>Bonne réponse 😏</p>
-    <p>À vendredi 💕</p>
+  <!-- SUCCESS -->
+  <div class="card success hidden" id="success">
+    <h1>C’était évident ✨</h1>
+    <p>Bonne décision.</p>
+    <p>À vendredi 💗</p>
 
-    <img src="https://media.giphy.com/media/l0MYC0LajbaPoEADu/giphy.gif">
+    <img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif">
   </div>
 
   <script>
-    let level = 0;
+    let mood = 0;
 
     const fill = document.getElementById("fill");
-    const meterText = document.getElementById("meterText");
-    const noBtn = document.getElementById("noBtn");
-    const chooseBtn = document.getElementById("chooseBtn");
-    const scene = document.getElementById("scene");
+    const noBtn = document.getElementById("no");
+    const yesBtn = document.getElementById("yes");
+    const card = document.getElementById("card");
     const success = document.getElementById("success");
 
-    const messages = [
-      "Hmm… réfléchis encore 😌",
-      "Ton sourire dit oui 😏",
-      "La barre ne ment jamais 💗",
-      "Bon… on sait tous la réponse 😄"
-    ];
-
     noBtn.addEventListener("click", () => {
-      level += 25;
-      fill.style.width = level + "%";
-      meterText.textContent = messages[Math.min(level / 25 - 1, messages.length - 1)];
+      mood += 25;
+      fill.style.width = mood + "%";
 
-      if (level >= 100) {
-        scene.classList.add("hidden");
+      if (mood >= 100) {
+        card.classList.add("hidden");
         success.classList.remove("hidden");
       }
     });
 
-    chooseBtn.addEventListener("click", () => {
-      scene.classList.add("hidden");
+    yesBtn.addEventListener("click", () => {
+      card.classList.add("hidden");
       success.classList.remove("hidden");
     });
   </script>
