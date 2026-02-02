@@ -80,6 +80,7 @@
             border: 3px dashed #ffafcc;
             position: relative;
             z-index: 5;
+            transition: all 0.5s ease;
         }
         
         .question {
@@ -87,6 +88,7 @@
             color: #444;
             line-height: 1.4;
             padding: 10px 0;
+            transition: all 0.5s ease;
         }
         
         .sofia-name {
@@ -127,7 +129,7 @@
             display: inline-flex;
             align-items: center;
             gap: 15px;
-            order: 1; /* OUI au-dessus */
+            order: 1;
         }
         
         .oui-btn:hover {
@@ -144,7 +146,7 @@
             border-radius: 60px;
             cursor: pointer;
             box-shadow: 0 8px 20px rgba(255, 92, 141, 0.4);
-            position: fixed; /* Fixed pour bouger partout */
+            position: fixed; /* FIXED pour bouger partout */
             z-index: 100;
             font-weight: 800;
             display: flex;
@@ -152,11 +154,10 @@
             gap: 10px;
             transition: none !important;
             animation: none !important;
-            order: 2; /* NON en dessous */
-            /* Position initiale en dessous de OUI */
-            top: 50%;
+            /* Position initiale */
+            top: 60%;
             left: 50%;
-            transform: translate(-50%, 100px);
+            transform: translate(-50%, 0);
         }
         
         .non-btn .shy-text {
@@ -188,12 +189,13 @@
             100% { transform: scale(1); opacity: 1; }
         }
         
-        .celebration {
+        .celebration-container {
             display: none;
             margin-top: 30px;
             animation: celebrateIn 0.8s ease;
             position: relative;
             z-index: 5;
+            text-align: center;
         }
         
         @keyframes celebrateIn {
@@ -202,21 +204,12 @@
             100% { transform: scale(1); opacity: 1; }
         }
         
-        .celebration-gif {
-            width: 100%;
-            max-width: 300px;
-            border-radius: 20px;
-            margin: 20px 0;
-            border: 5px solid #ffafcc;
-            box-shadow: 0 15px 30px rgba(255, 107, 157, 0.3);
-        }
-        
         .yay-text {
             font-family: 'Comic Neue', cursive;
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             color: #ff006e;
             font-weight: 900;
-            margin: 15px 0;
+            margin: 10px 0 20px 0;
             animation: bounce 0.6s infinite alternate;
             text-shadow: 3px 3px 0 #ffafcc;
         }
@@ -224,6 +217,15 @@
         @keyframes bounce {
             from { transform: translateY(0); }
             to { transform: translateY(-15px); }
+        }
+        
+        .celebration-gif {
+            width: 100%;
+            max-width: 320px;
+            border-radius: 20px;
+            margin: 10px 0;
+            border: 6px solid #ffafcc;
+            box-shadow: 0 15px 30px rgba(255, 107, 157, 0.3);
         }
         
         .footer {
@@ -281,7 +283,11 @@
             }
             
             .yay-text {
-                font-size: 2rem;
+                font-size: 2.2rem;
+            }
+            
+            .celebration-gif {
+                max-width: 280px;
             }
             
             .cute-emoji {
@@ -310,30 +316,29 @@
         <div class="card">
             <h1 class="title">Question pour toi ✨</h1>
             
-            <div class="question-box">
-                <p class="question">
+            <!-- Question Section (will be replaced) -->
+            <div class="question-box" id="questionBox">
+                <p class="question" id="questionText">
                     <span class="sofia-name">Sofia</span><br>
                     veux-tu sortir vendredi ? 
                     <span style="font-size: 2rem; display: block; margin-top: 15px;">😊</span>
                 </p>
             </div>
             
+            <!-- Celebration Section (hidden initially) -->
+            <div class="celebration-container" id="celebrationContainer">
+                <div class="yay-text">🎉 YAY! À vendredi! 🎉</div>
+                <!-- GIF d'un homme qui célèbre -->
+                <img class="celebration-gif" src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Man Celebrating">
+            </div>
+            
             <div class="buttons-container">
-                <!-- OUI est AU-DESSUS de Non -->
                 <button class="oui-btn" id="ouiBtn">
                     <i class="fas fa-heart"></i> OUI !
                 </button>
-                
-                <!-- NON sera placé dynamiquement en dessous -->
             </div>
             
             <div class="message" id="message"></div>
-            
-            <div class="celebration" id="celebration">
-                <!-- Nouveau GIF de fête qui marche -->
-                <img class="celebration-gif" src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Celebration">
-                <div class="yay-text">🎉 YAY! À vendredi! 🎉</div>
-            </div>
             
             <div class="footer">
                 <p>Le bouton "Non" fuit partout sur la page! 😉</p>
@@ -341,7 +346,7 @@
         </div>
     </div>
 
-    <!-- Le bouton NON est SEPARÉ pour bouger partout -->
+    <!-- Le bouton NON - bouge PARTOUT sur la page -->
     <button class="non-btn" id="nonBtn">
         <i class="fas fa-grin-tongue-squint"></i> Non 
         <span class="shy-text">(shy 😈)</span>
@@ -355,37 +360,50 @@
             const ouiBtn = document.getElementById('ouiBtn');
             const nonBtn = document.getElementById('nonBtn');
             const message = document.getElementById('message');
-            const celebration = document.getElementById('celebration');
+            const questionBox = document.getElementById('questionBox');
+            const questionText = document.getElementById('questionText');
+            const celebrationContainer = document.getElementById('celebrationContainer');
             
             let lastMoveTime = 0;
             let isCelebrating = false;
             
-            // Position initiale du bouton Non (en dessous de OUI)
-            function positionNonButtonInitially() {
-                const ouiBtnRect = ouiBtn.getBoundingClientRect();
-                const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+            // Position initiale du bouton Non (n'importe où sur la page)
+            function positionNonButtonRandomly() {
+                // Position aléatoire sur TOUTE la page
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
                 
-                // Positionner Non 80px en dessous de OUI
-                const nonBtnTop = ouiBtnRect.bottom + scrollY + 80;
-                const nonBtnLeft = ouiBtnRect.left + ouiBtnRect.width/2 - nonBtn.offsetWidth/2;
+                // Calculer la hauteur totale du document pour le scroll
+                const docHeight = Math.max(
+                    document.body.scrollHeight,
+                    document.documentElement.scrollHeight,
+                    document.body.offsetHeight,
+                    document.documentElement.offsetHeight,
+                    document.body.clientHeight,
+                    document.documentElement.clientHeight
+                );
                 
-                nonBtn.style.position = 'absolute';
-                nonBtn.style.left = `${nonBtnLeft}px`;
-                nonBtn.style.top = `${nonBtnTop}px`;
+                // Position aléatoire (dans le viewport initial)
+                const randomX = Math.random() * (viewportWidth - nonBtn.offsetWidth - 80) + 40;
+                const randomY = Math.random() * (viewportHeight - nonBtn.offsetHeight - 80) + 40;
+                
+                nonBtn.style.position = 'fixed';
+                nonBtn.style.left = `${randomX}px`;
+                nonBtn.style.top = `${randomY}px`;
                 nonBtn.style.transform = 'none';
                 
-                console.log('Non button positioned below Oui');
+                console.log('Non button placed randomly on page');
             }
             
-            // Position initiale
-            setTimeout(positionNonButtonInitially, 100);
+            // Position initiale aléatoire
+            setTimeout(positionNonButtonRandomly, 100);
             
-            // Make button escape FAST when mouse gets close - TOUTE LA PAGE
+            // Faire bouger le bouton Non PARTOUT quand la souris s'approche
             document.addEventListener('mousemove', function(event) {
                 if (isCelebrating) return;
                 
                 const now = Date.now();
-                if (now - lastMoveTime < 80) return; // Plus rapide!
+                if (now - lastMoveTime < 70) return; // Encore plus rapide!
                 
                 const btnRect = nonBtn.getBoundingClientRect();
                 const btnCenterX = btnRect.left + btnRect.width / 2;
@@ -396,34 +414,31 @@
                     Math.pow(event.clientY - btnCenterY, 2)
                 );
                 
-                // If mouse is within 100px of button, ESCAPE FAST!
-                if (distance < 100) {
+                // Si la souris est à moins de 90px, ÉCHAPPE VITE!
+                if (distance < 90) {
                     lastMoveTime = now;
                     
-                    // Passer en position fixed pour bouger partout
-                    nonBtn.style.position = 'fixed';
-                    
-                    // Calculate escape direction
+                    // Calculer la direction d'échappement
                     const angle = Math.atan2(btnCenterY - event.clientY, btnCenterX - event.clientX);
                     
-                    // Random escape distance - peut aller loin!
-                    const escapeDistance = 120 + Math.random() * 200;
+                    // Distance d'échappement aléatoire - peut aller TRÈS loin!
+                    const escapeDistance = 150 + Math.random() * 250;
                     
-                    // Calculate new position - N'IMPORTE OÙ sur la page!
+                    // Nouvelle position - N'IMPORTE OÙ sur la page!
                     let newX = btnCenterX + Math.cos(angle) * escapeDistance;
                     let newY = btnCenterY + Math.sin(angle) * escapeDistance;
                     
-                    // Keep within viewport avec marge
-                    const padding = 40;
+                    // Garder dans les limites de la fenêtre avec marge
+                    const padding = 50;
                     newX = Math.max(padding, Math.min(newX, window.innerWidth - nonBtn.offsetWidth - padding));
                     newY = Math.max(padding, Math.min(newY, window.innerHeight - nonBtn.offsetHeight - padding));
                     
-                    // INSTANT movement
+                    // MOUVEMENT INSTANTANÉ
                     nonBtn.style.left = `${newX}px`;
                     nonBtn.style.top = `${newY}px`;
                     nonBtn.style.transform = 'translate(0, 0)';
                     
-                    // Show message
+                    // Afficher un message
                     if (Math.random() > 0.6) {
                         const messages = [
                             "Trop rapide! ⚡",
@@ -432,10 +447,10 @@
                             "Haha! 😈",
                             "Essaie encore! 💨",
                             "Presque! 🙈",
-                            "Trop lent! 😄",
-                            "Attrape-moi! 🎯",
+                            "Impossible à attraper! 🚀",
                             "Il court partout! 🌪️",
-                            "Impossible à attraper! 🚀"
+                            "Fuis! Fuis! 🏃‍♂️💨",
+                            "Bonne chance! 😂"
                         ];
                         message.textContent = messages[Math.floor(Math.random() * messages.length)];
                         message.style.display = 'block';
@@ -447,18 +462,18 @@
                         }, 1000);
                     }
                     
-                    // Visual effect
+                    // Effet visuel
                     nonBtn.style.boxShadow = '0 0 0 4px rgba(255, 255, 255, 0.9), 0 10px 25px rgba(255, 92, 141, 0.6)';
                     setTimeout(() => {
                         nonBtn.style.boxShadow = '0 8px 20px rgba(255, 92, 141, 0.4)';
                     }, 100);
                     
-                    // Parfois téléportation COMPLÈTE!
+                    // Téléportation COMPLÈTE parfois!
                     if (Math.random() > 0.8) {
                         setTimeout(() => {
-                            // Téléporte à un endroit RANDOM sur toute la page!
-                            const randomX = Math.random() * (window.innerWidth - nonBtn.offsetWidth - 80) + 40;
-                            const randomY = Math.random() * (window.innerHeight - nonBtn.offsetHeight - 80) + 40;
+                            // Téléporte à un endroit RANDOM sur TOUTE la page!
+                            const randomX = Math.random() * (window.innerWidth - nonBtn.offsetWidth - 100) + 50;
+                            const randomY = Math.random() * (window.innerHeight - nonBtn.offsetHeight - 100) + 50;
                             
                             nonBtn.style.left = `${randomX}px`;
                             nonBtn.style.top = `${randomY}px`;
@@ -485,21 +500,18 @@
                             });
                             
                             setTimeout(() => teleport.remove(), 500);
-                            
-                            message.textContent = "TÉLÉPORTATION! 🌀";
-                            message.style.display = 'block';
                         }, 50);
                     }
                     
                     // Effet de scale
                     if (Math.random() > 0.4) {
-                        const scale = 0.7 + Math.random() * 0.4;
+                        const scale = 0.6 + Math.random() * 0.5;
                         nonBtn.style.transform = `scale(${scale})`;
                     }
                     
-                    // Parfois rotation folle
+                    // Rotation folle parfois
                     if (Math.random() > 0.7) {
-                        const rotate = Math.random() * 60 - 30;
+                        const rotate = Math.random() * 90 - 45;
                         nonBtn.style.transform += ` rotate(${rotate}deg)`;
                     }
                 }
@@ -521,8 +533,8 @@
                 event.preventDefault();
                 
                 const fakeEvent = new MouseEvent('mousemove', {
-                    clientX: event.clientX + 200,
-                    clientY: event.clientY + 200
+                    clientX: event.clientX + 250,
+                    clientY: event.clientY + 250
                 });
                 document.dispatchEvent(fakeEvent);
                 
@@ -543,76 +555,88 @@
                 // Retirer les écouteurs d'événements
                 document.removeEventListener('mousemove', arguments.callee);
                 
-                // Cacher les boutons et message
+                // Cacher le bouton OUI et message
                 ouiBtn.style.display = 'none';
                 nonBtn.style.display = 'none';
                 message.style.display = 'none';
                 
-                // Afficher la célébration
-                celebration.style.display = 'block';
+                // Animation de disparition de la question
+                questionBox.style.opacity = '0';
+                questionBox.style.transform = 'translateY(-20px)';
                 
-                // Créer des confettis MASSIFS
-                for (let i = 0; i < 120; i++) {
-                    setTimeout(() => {
-                        createConfetti();
-                    }, i * 10);
-                }
-                
-                // Changer le background
-                document.body.style.background = 'linear-gradient(135deg, #ff9ec0 0%, #a29bfe 33%, #74b9ff 66%, #ffd166 100%)';
-                document.body.style.animation = 'rainbowBG 8s infinite linear';
-                
-                // Ajouter l'animation arc-en-ciel
-                const style = document.createElement('style');
-                style.textContent = `
-                    @keyframes rainbowBG {
-                        0% { filter: hue-rotate(0deg); }
-                        100% { filter: hue-rotate(360deg); }
-                    }
-                `;
-                document.head.appendChild(style);
-                
-                // Effets étincelles supplémentaires
-                for (let i = 0; i < 30; i++) {
-                    setTimeout(() => {
-                        createSparkle();
-                    }, i * 150);
-                }
-                
-                // Message final
                 setTimeout(() => {
-                    const finalMessage = document.createElement('div');
-                    finalMessage.innerHTML = '🎉✨💖🥳🎊🌟😊💕';
-                    finalMessage.style.position = 'fixed';
-                    finalMessage.style.top = '50%';
-                    finalMessage.style.left = '50%';
-                    finalMessage.style.transform = 'translate(-50%, -50%)';
-                    finalMessage.style.fontSize = '3rem';
-                    finalMessage.style.zIndex = '1002';
-                    finalMessage.style.opacity = '0';
-                    finalMessage.style.textAlign = 'center';
-                    document.body.appendChild(finalMessage);
+                    // Cacher la question
+                    questionBox.style.display = 'none';
                     
-                    finalMessage.animate([
-                        { opacity: 0, transform: 'translate(-50%, -50%) scale(0.5)' },
-                        { opacity: 1, transform: 'translate(-50%, -50%) scale(1.2)' },
-                        { opacity: 1, transform: 'translate(-50%, -50%) scale(1)' }
-                    ], {
-                        duration: 1000,
-                        easing: 'ease-out'
-                    });
+                    // Afficher la célébration
+                    celebrationContainer.style.display = 'block';
                     
-                    setTimeout(() => finalMessage.remove(), 3000);
-                }, 1000);
+                    // Créer des confettis MASSIFS
+                    for (let i = 0; i < 150; i++) {
+                        setTimeout(() => {
+                            createConfetti();
+                        }, i * 8);
+                    }
+                    
+                    // Changer le background en mode fête
+                    document.body.style.background = 'linear-gradient(135deg, #ff9ec0 0%, #a29bfe 33%, #74b9ff 66%, #ffd166 100%)';
+                    document.body.style.animation = 'rainbowBG 10s infinite linear';
+                    
+                    // Ajouter l'animation arc-en-ciel
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        @keyframes rainbowBG {
+                            0% { filter: hue-rotate(0deg); }
+                            100% { filter: hue-rotate(360deg); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    
+                    // Effets étincelles supplémentaires
+                    for (let i = 0; i < 40; i++) {
+                        setTimeout(() => {
+                            createSparkle();
+                        }, i * 120);
+                    }
+                    
+                    // Message final flottant
+                    setTimeout(() => {
+                        const finalMessage = document.createElement('div');
+                        finalMessage.innerHTML = '✨🎉💖 YAY! ✨🎉💖';
+                        finalMessage.style.position = 'fixed';
+                        finalMessage.style.top = '20%';
+                        finalMessage.style.left = '50%';
+                        finalMessage.style.transform = 'translate(-50%, -50%)';
+                        finalMessage.style.fontSize = '2.5rem';
+                        finalMessage.style.zIndex = '1002';
+                        finalMessage.style.opacity = '0';
+                        finalMessage.style.textAlign = 'center';
+                        finalMessage.style.fontWeight = '900';
+                        finalMessage.style.color = '#ff006e';
+                        finalMessage.style.textShadow = '3px 3px 0 #ffafcc';
+                        document.body.appendChild(finalMessage);
+                        
+                        finalMessage.animate([
+                            { opacity: 0, transform: 'translate(-50%, -50%) scale(0.5)' },
+                            { opacity: 1, transform: 'translate(-50%, -50%) scale(1.2)' },
+                            { opacity: 1, transform: 'translate(-50%, -50%) scale(1)' }
+                        ], {
+                            duration: 800,
+                            easing: 'ease-out'
+                        });
+                        
+                        setTimeout(() => finalMessage.remove(), 4000);
+                    }, 800);
+                }, 500);
             });
             
             // Créer des confettis
             function createConfetti() {
                 const confetti = document.createElement('div');
-                const emojis = ['🎉', '✨', '🎊', '🥳', '💖', '🌟', '😊', '💕', '🎈', '🌸', '🦄', '🌈'];
+                const emojis = ['🎉', '✨', '🎊', '🥳', '💖', '🌟', '😊', '💕', '🎈', '🌸', '🦄', '🌈', '🎇', '🎆'];
                 confetti.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
                 confetti.style.position = 'fixed';
-                confetti.style.fontSize = (Math.random() * 30 + 20) + 'px';
+                confetti.style.fontSize = (Math.random() * 35 + 15) + 'px';
                 confetti.style.left = Math.random() * 100 + 'vw';
                 confetti.style.top = '-50px';
                 confetti.style.zIndex = '1000';
@@ -620,12 +644,12 @@
                 
                 document.body.appendChild(confetti);
                 
-                const duration = Math.random() * 1500 + 800;
-                const endX = (Math.random() * 300 - 150) + 'px';
+                const duration = Math.random() * 2000 + 1000;
+                const endX = (Math.random() * 400 - 200) + 'px';
                 
                 confetti.animate([
                     { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
-                    { transform: `translateY(${window.innerHeight + 100}px) translateX(${endX}) rotate(${Math.random() * 1080}deg)`, opacity: 0 }
+                    { transform: `translateY(${window.innerHeight + 100}px) translateX(${endX}) rotate(${Math.random() * 1440}deg)`, opacity: 0 }
                 ], {
                     duration: duration,
                     easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)'
@@ -639,7 +663,7 @@
                 const sparkle = document.createElement('div');
                 sparkle.innerHTML = '✨';
                 sparkle.style.position = 'fixed';
-                sparkle.style.fontSize = (Math.random() * 40 + 20) + 'px';
+                sparkle.style.fontSize = (Math.random() * 50 + 20) + 'px';
                 sparkle.style.left = Math.random() * 100 + 'vw';
                 sparkle.style.top = Math.random() * 100 + 'vh';
                 sparkle.style.zIndex = '1001';
@@ -649,27 +673,25 @@
                 
                 sparkle.animate([
                     { transform: 'scale(0) rotate(0deg)', opacity: 0 },
-                    { transform: 'scale(1.8) rotate(180deg)', opacity: 0.9 },
+                    { transform: 'scale(2) rotate(180deg)', opacity: 0.9 },
                     { transform: 'scale(0) rotate(360deg)', opacity: 0 }
                 ], {
-                    duration: 1200,
+                    duration: 1500,
                     easing: 'ease-out'
                 });
                 
-                setTimeout(() => sparkle.remove(), 1200);
+                setTimeout(() => sparkle.remove(), 1500);
             }
             
             // Gérer le redimensionnement de la fenêtre
             window.addEventListener('resize', function() {
-                if (!isCelebrating && nonBtn.style.position === 'fixed') {
+                if (!isCelebrating) {
                     const btnRect = nonBtn.getBoundingClientRect();
                     
-                    // Si le bouton est hors de l'écran, le ramener
+                    // Si le bouton est hors de l'écran, le repositionner aléatoirement
                     if (btnRect.left < 0 || btnRect.top < 0 || 
                         btnRect.right > window.innerWidth || btnRect.bottom > window.innerHeight) {
-                        nonBtn.style.left = '50%';
-                        nonBtn.style.top = '50%';
-                        nonBtn.style.transform = 'translate(-50%, -50%)';
+                        positionNonButtonRandomly();
                     }
                 }
             });
