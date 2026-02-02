@@ -22,22 +22,26 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
+            position: relative;
+            overflow: hidden;
         }
         
         .container {
             max-width: 500px;
             width: 100%;
+            z-index: 10;
+            position: relative;
         }
         
         .card {
             background: white;
             border-radius: 25px;
-            padding: 35px 30px;
+            padding: 40px 30px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
             text-align: center;
             border: 8px solid #ffafcc;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
         }
         
         .card::before {
@@ -62,112 +66,105 @@
             font-family: 'Comic Neue', cursive;
             font-size: 2rem;
             color: #ff006e;
-            margin-bottom: 15px;
+            margin-bottom: 25px;
             text-shadow: 2px 2px 0 #ffafcc;
         }
         
         .question-box {
             background: linear-gradient(135deg, #fff5f9 0%, #f0f8ff 100%);
             border-radius: 18px;
-            padding: 20px;
-            margin: 20px 0;
+            padding: 25px;
+            margin: 25px 0 40px 0; /* More space below */
             border: 3px dashed #ffafcc;
         }
         
         .question {
-            font-size: 1.6rem;
+            font-size: 1.7rem;
             color: #444;
             line-height: 1.4;
+            padding: 10px 0;
         }
         
         .sofia-name {
             color: #ff006e;
             font-weight: 800;
             background: #ffe5ec;
-            padding: 5px 15px;
+            padding: 8px 20px;
             border-radius: 50px;
             display: inline-block;
-            margin: 0 5px;
-            border: 2px solid #ffafcc;
+            margin: 0 8px 15px 8px; /* Space below name */
+            border: 3px solid #ffafcc;
         }
         
-        .buttons-playground {
+        .buttons-area {
             position: relative;
-            height: 220px; /* More height for better spacing */
-            margin: 25px 0;
-            background: #f8f9ff;
-            border-radius: 18px;
-            border: 3px solid #a2d2ff;
-            overflow: hidden;
+            margin: 30px 0;
+            min-height: 120px;
         }
         
         .oui-btn {
             background: linear-gradient(135deg, #4cd964 0%, #2ecc71 100%);
             color: white;
             border: none;
-            padding: 18px 45px;
-            font-size: 1.7rem;
-            border-radius: 50px;
+            padding: 20px 50px;
+            font-size: 1.8rem;
+            border-radius: 60px;
             cursor: pointer;
-            box-shadow: 0 8px 20px rgba(76, 217, 100, 0.4);
-            position: absolute;
-            top: 40px; /* More space from top */
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 2;
+            box-shadow: 0 10px 25px rgba(76, 217, 100, 0.4);
+            position: relative;
+            z-index: 5;
             transition: all 0.3s;
-            font-weight: 700;
-            display: flex;
+            font-weight: 800;
+            display: inline-flex;
             align-items: center;
-            gap: 10px;
-            min-width: 180px;
+            gap: 15px;
+            margin-top: 20px;
         }
         
         .oui-btn:hover {
-            transform: translateX(-50%) scale(1.05);
-            box-shadow: 0 12px 25px rgba(76, 217, 100, 0.6);
+            transform: scale(1.08);
+            box-shadow: 0 15px 30px rgba(76, 217, 100, 0.6);
         }
         
         .non-btn {
             background: linear-gradient(135deg, #ff8fab 0%, #ff5c8d 100%);
             color: white;
             border: none;
-            padding: 16px 40px;
-            font-size: 1.5rem;
-            border-radius: 50px;
+            padding: 18px 45px;
+            font-size: 1.6rem;
+            border-radius: 60px;
             cursor: pointer;
-            box-shadow: 0 6px 15px rgba(255, 92, 141, 0.4);
+            box-shadow: 0 8px 20px rgba(255, 92, 141, 0.4);
             position: absolute;
-            top: 130px; /* More space between buttons */
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 3;
-            transition: all 0.2s;
-            font-weight: 700;
+            z-index: 20;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            font-weight: 800;
             display: flex;
             align-items: center;
-            gap: 8px;
-            min-width: 200px;
+            gap: 10px;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
         }
         
         .non-btn .shy-text {
             font-size: 0.9rem;
             opacity: 0.9;
-            margin-left: 5px;
+            margin-left: 8px;
             font-weight: 600;
             font-style: italic;
         }
         
         .message {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             color: #ff6b9d;
-            margin: 20px 0;
-            min-height: 45px;
+            margin: 30px 0 20px 0;
+            min-height: 50px;
             font-weight: 700;
-            padding: 12px 20px;
+            padding: 15px 25px;
             background: #fff5f9;
-            border-radius: 12px;
-            border: 2px solid #ffafcc;
+            border-radius: 15px;
+            border: 3px solid #ffafcc;
             display: none;
             animation: messagePop 0.5s ease;
         }
@@ -179,7 +176,7 @@
         
         .celebration {
             display: none;
-            margin-top: 20px;
+            margin-top: 30px;
             animation: celebrateIn 1s ease;
         }
         
@@ -191,48 +188,50 @@
         
         .celebration-gif {
             width: 100%;
-            max-width: 280px;
-            border-radius: 15px;
-            margin: 15px 0;
-            border: 4px solid #ffafcc;
+            max-width: 300px;
+            border-radius: 20px;
+            margin: 20px 0;
+            border: 5px solid #ffafcc;
+            box-shadow: 0 15px 30px rgba(255, 107, 157, 0.3);
         }
         
         .yay-text {
             font-family: 'Comic Neue', cursive;
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             color: #ff006e;
             font-weight: 900;
-            margin: 10px 0;
+            margin: 15px 0;
             animation: bounce 0.8s infinite alternate;
+            text-shadow: 3px 3px 0 #ffafcc;
         }
         
         @keyframes bounce {
             from { transform: translateY(0); }
-            to { transform: translateY(-10px); }
+            to { transform: translateY(-15px); }
         }
         
         .footer {
-            margin-top: 20px;
+            margin-top: 30px;
             color: #888;
-            font-size: 0.9rem;
+            font-size: 1rem;
             font-style: italic;
         }
         
         .cute-emoji {
             position: absolute;
-            font-size: 1.8rem;
+            font-size: 2rem;
             z-index: 1;
             animation: float 3s ease-in-out infinite;
         }
         
-        .emoji-1 { top: 15px; left: 15px; }
-        .emoji-2 { top: 15px; right: 15px; animation-delay: 0.5s; }
-        .emoji-3 { bottom: 15px; left: 15px; animation-delay: 1s; }
-        .emoji-4 { bottom: 15px; right: 15px; animation-delay: 1.5s; }
+        .emoji-1 { top: 20px; left: 20px; }
+        .emoji-2 { top: 20px; right: 20px; animation-delay: 0.5s; }
+        .emoji-3 { bottom: 20px; left: 20px; animation-delay: 1s; }
+        .emoji-4 { bottom: 20px; right: 20px; animation-delay: 1.5s; }
         
         @keyframes float {
             0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-8px) rotate(5deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
         }
         
         /* Mobile responsive */
@@ -242,7 +241,7 @@
             }
             
             .card {
-                padding: 25px 20px;
+                padding: 30px 20px;
             }
             
             .title {
@@ -250,33 +249,25 @@
             }
             
             .question {
-                font-size: 1.4rem;
-            }
-            
-            .buttons-playground {
-                height: 200px;
+                font-size: 1.5rem;
             }
             
             .oui-btn {
-                padding: 16px 35px;
-                font-size: 1.5rem;
-                top: 35px;
-                min-width: 160px;
+                padding: 18px 40px;
+                font-size: 1.6rem;
             }
             
             .non-btn {
-                padding: 14px 30px;
-                font-size: 1.3rem;
-                top: 115px;
-                min-width: 180px;
+                padding: 16px 35px;
+                font-size: 1.4rem;
             }
             
             .yay-text {
-                font-size: 1.9rem;
+                font-size: 2rem;
             }
             
             .cute-emoji {
-                font-size: 1.5rem;
+                font-size: 1.6rem;
             }
         }
     </style>
@@ -294,13 +285,13 @@
             
             <div class="question-box">
                 <p class="question">
-                    <span class="sofia-name">Sofia</span>, 
+                    <span class="sofia-name">Sofia</span><br>
                     veux-tu sortir vendredi ? 
-                    <span style="font-size: 1.8rem;">😊</span>
+                    <span style="font-size: 2rem; display: block; margin-top: 15px;">😊</span>
                 </p>
             </div>
             
-            <div class="buttons-playground" id="playground">
+            <div class="buttons-area">
                 <button class="oui-btn" id="ouiBtn">
                     <i class="fas fa-heart"></i> OUI !
                 </button>
@@ -318,7 +309,7 @@
             </div>
             
             <div class="footer">
-                <p>Le bouton "Non" fuit quand tu t'approches! 😉</p>
+                <p>Le bouton "Non" fuit n'importe où sur la page! 😉</p>
             </div>
         </div>
     </div>
@@ -329,59 +320,56 @@
             const nonBtn = document.getElementById('nonBtn');
             const message = document.getElementById('message');
             const celebration = document.getElementById('celebration');
-            const playground = document.getElementById('playground');
             
             let isMoving = false;
+            let nonBtnPosition = { x: window.innerWidth/2 - nonBtn.offsetWidth/2, y: 200 };
             
-            // Position the non button initially
-            nonBtn.style.position = 'absolute';
+            // Position non button initially
+            nonBtn.style.position = 'fixed';
             nonBtn.style.left = '50%';
-            nonBtn.style.top = '130px';
-            nonBtn.style.transform = 'translateX(-50%)';
+            nonBtn.style.top = '50%';
+            nonBtn.style.transform = 'translate(-50%, -50%)';
             
-            // Make NON button escape when mouse gets close
-            playground.addEventListener('mousemove', function(event) {
+            // Make button run anywhere on the page
+            function makeButtonEscape(event) {
                 if (isMoving) return;
                 
-                const rect = playground.getBoundingClientRect();
-                const mouseX = event.clientX - rect.left;
-                const mouseY = event.clientY - rect.top;
-                
                 const btnRect = nonBtn.getBoundingClientRect();
-                const btnX = btnRect.left - rect.left + nonBtn.offsetWidth / 2;
-                const btnY = btnRect.top - rect.top + nonBtn.offsetHeight / 2;
+                const btnCenterX = btnRect.left + btnRect.width / 2;
+                const btnCenterY = btnRect.top + btnRect.height / 2;
                 
-                // Distance between mouse and button
                 const distance = Math.sqrt(
-                    Math.pow(mouseX - btnX, 2) + 
-                    Math.pow(mouseY - btnY, 2)
+                    Math.pow(event.clientX - btnCenterX, 2) + 
+                    Math.pow(event.clientY - btnCenterY, 2)
                 );
                 
-                // If mouse is within 80px, escape!
-                if (distance < 80) {
+                // If mouse is within 100px of button, escape!
+                if (distance < 100) {
                     isMoving = true;
                     
-                    // Calculate escape direction (away from mouse)
-                    const angle = Math.atan2(btnY - mouseY, btnX - mouseX);
-                    const escapeDist = 120 + Math.random() * 100;
+                    // Calculate escape direction (opposite of mouse)
+                    const angle = Math.atan2(btnCenterY - event.clientY, btnCenterX - event.clientX);
+                    const escapeDistance = 150 + Math.random() * 200;
                     
-                    // New position
-                    let newX = btnX + Math.cos(angle) * escapeDist;
-                    let newY = btnY + Math.sin(angle) * escapeDist;
+                    // Calculate new position anywhere on screen
+                    let newX = btnCenterX + Math.cos(angle) * escapeDistance;
+                    let newY = btnCenterY + Math.sin(angle) * escapeDistance;
                     
-                    // Keep inside playground
-                    const maxX = playground.offsetWidth - nonBtn.offsetWidth;
-                    const maxY = playground.offsetHeight - nonBtn.offsetHeight;
+                    // Keep button within viewport (with some padding)
+                    const viewportWidth = window.innerWidth;
+                    const viewportHeight = window.innerHeight;
+                    const padding = 50;
                     
-                    newX = Math.max(10, Math.min(newX, maxX - 10));
-                    newY = Math.max(10, Math.min(newY, maxY - 10));
+                    newX = Math.max(padding, Math.min(newX, viewportWidth - nonBtn.offsetWidth - padding));
+                    newY = Math.max(padding, Math.min(newY, viewportHeight - nonBtn.offsetHeight - padding));
                     
-                    // Move button with animation
-                    nonBtn.style.transition = 'all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
-                    nonBtn.style.left = newX + 'px';
-                    nonBtn.style.top = newY + 'px';
+                    // Smooth animation
+                    nonBtn.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    nonBtn.style.left = `${newX}px`;
+                    nonBtn.style.top = `${newY}px`;
+                    nonBtn.style.transform = 'translate(0, 0)';
                     
-                    // Show random funny message
+                    // Show fun message
                     const messages = [
                         "Haha! Il s'échappe! 😆",
                         "Trop rapide! ⚡",
@@ -389,56 +377,100 @@
                         "Il est insaisissable! 🎯",
                         "Essaie encore! 😄",
                         "Oh non! Encore raté! 🙈",
-                        "Tu y es presque! 👀",
-                        "Dernière chance! 🎉"
+                        "Il court partout! 🏃‍♂️💨",
+                        "Attrape-moi si tu peux! 😈"
                     ];
                     
                     message.textContent = messages[Math.floor(Math.random() * messages.length)];
                     message.style.display = 'block';
                     
-                    // Make button a little smaller sometimes
-                    if (Math.random() > 0.7) {
-                        const scale = 0.9;
-                        nonBtn.style.transform = `scale(${scale})`;
-                    }
+                    // Add fun effects
+                    const scale = Math.max(0.7, 1 - Math.random() * 0.3);
+                    const rotate = Math.random() * 30 - 15;
                     
-                    // Add wiggle effect
                     setTimeout(() => {
-                        nonBtn.style.transform = 'rotate(5deg)';
+                        nonBtn.style.transform = `translate(0, 0) scale(${scale}) rotate(${rotate}deg)`;
+                        
+                        // Add bounce effect
                         setTimeout(() => {
-                            nonBtn.style.transform = 'rotate(-5deg)';
+                            nonBtn.style.transform = `translate(0, -10px) scale(${scale}) rotate(${rotate}deg)`;
                             setTimeout(() => {
-                                nonBtn.style.transform = 'rotate(0deg)';
+                                nonBtn.style.transform = `translate(0, 0) scale(${scale}) rotate(${rotate}deg)`;
+                                
+                                // Create escape trail effect
+                                for (let i = 0; i < 3; i++) {
+                                    setTimeout(() => {
+                                        createEscapeEffect(newX, newY);
+                                    }, i * 100);
+                                }
+                                
                                 isMoving = false;
-                            }, 100);
-                        }, 100);
-                    }, 400);
+                            }, 150);
+                        }, 150);
+                    }, 500);
                     
-                    // Sometimes button becomes very small (rare)
-                    if (Math.random() > 0.9) {
+                    // Randomly teleport sometimes (for extra fun)
+                    if (Math.random() > 0.8) {
                         setTimeout(() => {
-                            nonBtn.style.transform = 'scale(0.7)';
+                            const randomX = Math.random() * (viewportWidth - nonBtn.offsetWidth - 100) + 50;
+                            const randomY = Math.random() * (viewportHeight - nonBtn.offsetHeight - 100) + 50;
+                            
+                            nonBtn.style.transition = 'all 0.3s ease';
+                            nonBtn.style.left = `${randomX}px`;
+                            nonBtn.style.top = `${randomY}px`;
+                            nonBtn.style.transform = 'scale(1.2)';
+                            
                             setTimeout(() => {
                                 nonBtn.style.transform = 'scale(1)';
-                            }, 500);
-                        }, 500);
+                            }, 300);
+                            
+                            message.textContent = "Téléportation! 🌀";
+                        }, 800);
                     }
                 }
-            });
+            }
             
-            // Also make button escape if somehow mouse gets on it
+            // Create escape trail effect
+            function createEscapeEffect(x, y) {
+                const trail = document.createElement('div');
+                trail.innerHTML = '💨';
+                trail.style.position = 'fixed';
+                trail.style.left = `${x}px`;
+                trail.style.top = `${y}px`;
+                trail.style.fontSize = '20px';
+                trail.style.zIndex = '15';
+                trail.style.opacity = '0.7';
+                trail.style.pointerEvents = 'none';
+                
+                document.body.appendChild(trail);
+                
+                trail.animate([
+                    { transform: 'scale(1) rotate(0deg)', opacity: 0.7 },
+                    { transform: 'scale(1.5) rotate(180deg) translateX(-30px)', opacity: 0 }
+                ], {
+                    duration: 500,
+                    easing: 'ease-out'
+                });
+                
+                setTimeout(() => trail.remove(), 500);
+            }
+            
+            // Track mouse movement for escaping
+            document.addEventListener('mousemove', makeButtonEscape);
+            
+            // Also escape if mouse enters button
             nonBtn.addEventListener('mouseenter', function(event) {
                 if (!isMoving) {
-                    const fakeEvent = new MouseEvent('mousemove', {
-                        clientX: event.clientX,
-                        clientY: event.clientY
-                    });
-                    playground.dispatchEvent(fakeEvent);
+                    makeButtonEscape(event);
                 }
             });
             
             // When OUI is clicked
             ouiBtn.addEventListener('click', function() {
+                // Stop tracking mouse
+                document.removeEventListener('mousemove', makeButtonEscape);
+                
+                // Hide buttons and message
                 ouiBtn.style.display = 'none';
                 nonBtn.style.display = 'none';
                 message.style.display = 'none';
@@ -446,20 +478,34 @@
                 // Show celebration
                 celebration.style.display = 'block';
                 
-                // Add confetti effect
-                for (let i = 0; i < 40; i++) {
+                // Create massive confetti celebration
+                for (let i = 0; i < 80; i++) {
                     setTimeout(() => {
                         createConfetti();
-                    }, i * 30);
+                    }, i * 20);
                 }
+                
+                // Change background to celebration mode
+                document.body.style.background = 'linear-gradient(135deg, #ff9ec0 0%, #a29bfe 50%, #74b9ff 100%)';
+                document.body.style.animation = 'rainbowBG 10s infinite alternate';
+                
+                // Add rainbow background animation
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes rainbowBG {
+                        0% { filter: hue-rotate(0deg); }
+                        100% { filter: hue-rotate(360deg); }
+                    }
+                `;
+                document.head.appendChild(style);
             });
             
             // Create confetti particles
             function createConfetti() {
                 const confetti = document.createElement('div');
-                confetti.innerHTML = ['🎉', '✨', '🎊', '🥳', '💖'][Math.floor(Math.random() * 5)];
+                confetti.innerHTML = ['🎉', '✨', '🎊', '🥳', '💖', '🌟', '😊', '🎈'][Math.floor(Math.random() * 8)];
                 confetti.style.position = 'fixed';
-                confetti.style.fontSize = (Math.random() * 20 + 15) + 'px';
+                confetti.style.fontSize = (Math.random() * 25 + 15) + 'px';
                 confetti.style.left = Math.random() * 100 + 'vw';
                 confetti.style.top = '-50px';
                 confetti.style.zIndex = '1000';
@@ -467,17 +513,32 @@
                 
                 document.body.appendChild(confetti);
                 
-                // Animation
-                const animation = confetti.animate([
+                // Random animation
+                const duration = Math.random() * 3000 + 1500;
+                const endX = Math.random() * 200 - 100;
+                
+                confetti.animate([
                     { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
-                    { transform: `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+                    { transform: `translateY(${window.innerHeight + 100}px) translateX(${endX}px) rotate(${Math.random() * 720}deg)`, opacity: 0 }
                 ], {
-                    duration: Math.random() * 2000 + 1000,
+                    duration: duration,
                     easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)'
                 });
                 
-                animation.onfinish = () => confetti.remove();
+                setTimeout(() => confetti.remove(), duration);
             }
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                const btnRect = nonBtn.getBoundingClientRect();
+                if (btnRect.left < 0 || btnRect.top < 0 || 
+                    btnRect.right > window.innerWidth || btnRect.bottom > window.innerHeight) {
+                    // Reset button position if it's outside viewport
+                    nonBtn.style.left = '50%';
+                    nonBtn.style.top = '50%';
+                    nonBtn.style.transform = 'translate(-50%, -50%)';
+                }
+            });
         });
     </script>
 </body>
