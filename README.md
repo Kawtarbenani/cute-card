@@ -75,8 +75,10 @@
             background: linear-gradient(135deg, #fff5f9 0%, #f0f8ff 100%);
             border-radius: 18px;
             padding: 25px;
-            margin: 25px 0 40px 0;
+            margin: 25px 0 60px 0; /* More space below for buttons */
             border: 3px dashed #ffafcc;
+            position: relative;
+            z-index: 5;
         }
         
         .question {
@@ -99,8 +101,9 @@
         
         .buttons-area {
             position: relative;
-            margin: 30px 0;
-            min-height: 120px;
+            margin: 20px 0 40px 0;
+            min-height: 150px;
+            z-index: 10;
         }
         
         .oui-btn {
@@ -113,13 +116,13 @@
             cursor: pointer;
             box-shadow: 0 10px 25px rgba(76, 217, 100, 0.4);
             position: relative;
-            z-index: 5;
+            z-index: 15;
             transition: all 0.3s;
             font-weight: 800;
             display: inline-flex;
             align-items: center;
             gap: 15px;
-            margin-top: 20px;
+            margin: 10px 0;
         }
         
         .oui-btn:hover {
@@ -144,6 +147,10 @@
             gap: 10px;
             transition: none !important;
             animation: none !important;
+            /* Start position BELOW the card */
+            left: 50%;
+            top: calc(50% + 180px);
+            transform: translate(-50%, -50%);
         }
         
         .non-btn .shy-text {
@@ -166,6 +173,8 @@
             border: 3px solid #ffafcc;
             display: none;
             animation: messagePop 0.3s ease;
+            position: relative;
+            z-index: 5;
         }
         
         @keyframes messagePop {
@@ -177,6 +186,8 @@
             display: none;
             margin-top: 30px;
             animation: celebrateIn 0.8s ease;
+            position: relative;
+            z-index: 5;
         }
         
         @keyframes celebrateIn {
@@ -214,6 +225,8 @@
             color: #888;
             font-size: 1rem;
             font-style: italic;
+            position: relative;
+            z-index: 5;
         }
         
         .cute-emoji {
@@ -259,6 +272,7 @@
             .non-btn {
                 padding: 16px 35px;
                 font-size: 1.4rem;
+                top: calc(50% + 160px);
             }
             
             .yay-text {
@@ -294,10 +308,6 @@
                 <button class="oui-btn" id="ouiBtn">
                     <i class="fas fa-heart"></i> OUI !
                 </button>
-                <button class="non-btn" id="nonBtn">
-                    <i class="fas fa-grin-tongue-squint"></i> Non 
-                    <span class="shy-text">(shy 😈)</span>
-                </button>
             </div>
             
             <div class="message" id="message"></div>
@@ -313,6 +323,12 @@
         </div>
     </div>
 
+    <!-- Le bouton NON est EN DEHORS de la carte -->
+    <button class="non-btn" id="nonBtn">
+        <i class="fas fa-grin-tongue-squint"></i> Non 
+        <span class="shy-text">(shy 😈)</span>
+    </button>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const ouiBtn = document.getElementById('ouiBtn');
@@ -323,17 +339,31 @@
             let lastMoveTime = 0;
             let isCelebrating = false;
             
-            // Position non button initially
-            nonBtn.style.left = '50%';
-            nonBtn.style.top = '50%';
-            nonBtn.style.transform = 'translate(-50%, -50%)';
+            // Position initiale du bouton NON (en dessous de la carte)
+            function positionNonButton() {
+                const cardRect = document.querySelector('.card').getBoundingClientRect();
+                const windowHeight = window.innerHeight;
+                
+                // Positionner le bouton 50px en dessous de la carte
+                const targetY = cardRect.bottom + 50;
+                
+                // Si ça dépasse la fenêtre, le mettre plus haut
+                const finalY = Math.min(targetY, windowHeight - nonBtn.offsetHeight - 20);
+                
+                nonBtn.style.left = `${cardRect.left + (cardRect.width - nonBtn.offsetWidth) / 2}px`;
+                nonBtn.style.top = `${finalY}px`;
+                nonBtn.style.transform = 'translate(0, 0)';
+            }
+            
+            // Position initiale
+            positionNonButton();
             
             // Make button escape FAST when mouse gets close
             document.addEventListener('mousemove', function(event) {
                 if (isCelebrating) return;
                 
                 const now = Date.now();
-                if (now - lastMoveTime < 100) return; // Limit to 10 moves per second max
+                if (now - lastMoveTime < 100) return;
                 
                 const btnRect = nonBtn.getBoundingClientRect();
                 const btnCenterX = btnRect.left + btnRect.width / 2;
@@ -351,10 +381,10 @@
                     // Calculate escape direction
                     const angle = Math.atan2(btnCenterY - event.clientY, btnCenterX - event.clientX);
                     
-                    // Random escape distance (shorter for faster response)
+                    // Random escape distance
                     const escapeDistance = 100 + Math.random() * 150;
                     
-                    // Calculate new position
+                    // Calculate new position (anywhere on screen)
                     let newX = btnCenterX + Math.cos(angle) * escapeDistance;
                     let newY = btnCenterY + Math.sin(angle) * escapeDistance;
                     
@@ -363,12 +393,24 @@
                     newX = Math.max(padding, Math.min(newX, window.innerWidth - nonBtn.offsetWidth - padding));
                     newY = Math.max(padding, Math.min(newY, window.innerHeight - nonBtn.offsetHeight - padding));
                     
-                    // INSTANT movement (no transition)
+                    // Ensure button doesn't cover the question
+                    const cardRect = document.querySelector('.card').getBoundingClientRect();
+                    const questionRect = document.querySelector('.question-box').getBoundingClientRect();
+                    
+                    // If button is trying to go over the question area, push it away
+                    if (newX > questionRect.left - 50 && newX < questionRect.right + 50 &&
+                        newY > questionRect.top - 50 && newY < questionRect.bottom + 50) {
+                        // Push button away from question area
+                        newX = Math.random() > 0.5 ? questionRect.left - 80 : questionRect.right + 80;
+                        newY = questionRect.top + Math.random() * questionRect.height;
+                    }
+                    
+                    // INSTANT movement
                     nonBtn.style.left = `${newX}px`;
                     nonBtn.style.top = `${newY}px`;
                     nonBtn.style.transform = 'translate(0, 0)';
                     
-                    // Show message (but not every time to avoid spam)
+                    // Show message
                     if (Math.random() > 0.7) {
                         const messages = [
                             "Trop rapide! ⚡",
@@ -383,7 +425,6 @@
                         message.textContent = messages[Math.floor(Math.random() * messages.length)];
                         message.style.display = 'block';
                         
-                        // Hide message after 1 second
                         setTimeout(() => {
                             if (!isCelebrating) {
                                 message.style.display = 'none';
@@ -391,33 +432,44 @@
                         }, 1000);
                     }
                     
-                    // Add quick visual effect
-                    nonBtn.style.boxShadow = '0 0 0 3px rgba(255, 255, 255, 0.8)';
+                    // Visual effect
+                    nonBtn.style.boxShadow = '0 0 0 3px rgba(255, 255, 255, 0.8), 0 8px 20px rgba(255, 92, 141, 0.4)';
                     setTimeout(() => {
                         nonBtn.style.boxShadow = '0 8px 20px rgba(255, 92, 141, 0.4)';
                     }, 100);
                     
-                    // Sometimes teleport to random location for extra challenge
+                    // Sometimes teleport
                     if (Math.random() > 0.85) {
                         setTimeout(() => {
-                            const randomX = Math.random() * (window.innerWidth - nonBtn.offsetWidth - 60) + 30;
-                            const randomY = Math.random() * (window.innerHeight - nonBtn.offsetHeight - 60) + 30;
-                            nonBtn.style.left = `${randomX}px`;
-                            nonBtn.style.top = `${randomY}px`;
+                            // Find a spot that's NOT over the question
+                            let safeX, safeY;
+                            let attempts = 0;
+                            
+                            do {
+                                safeX = Math.random() * (window.innerWidth - nonBtn.offsetWidth - 60) + 30;
+                                safeY = Math.random() * (window.innerHeight - nonBtn.offsetHeight - 60) + 30;
+                                attempts++;
+                                
+                                // Ensure not over question area
+                            } while (attempts < 10 && 
+                                     safeX > questionRect.left - 50 && safeX < questionRect.right + 50 &&
+                                     safeY > questionRect.top - 50 && safeY < questionRect.bottom + 50);
+                            
+                            nonBtn.style.left = `${safeX}px`;
+                            nonBtn.style.top = `${safeY}px`;
                             
                             // Teleport effect
                             const teleport = document.createElement('div');
                             teleport.innerHTML = '🌀';
                             teleport.style.position = 'fixed';
-                            teleport.style.left = `${randomX}px`;
-                            teleport.style.top = `${randomY}px`;
+                            teleport.style.left = `${safeX}px`;
+                            teleport.style.top = `${safeY}px`;
                             teleport.style.fontSize = '30px';
                             teleport.style.zIndex = '99';
                             teleport.style.opacity = '0';
                             teleport.style.transform = 'scale(0)';
                             document.body.appendChild(teleport);
                             
-                            // Animate teleport effect
                             teleport.animate([
                                 { transform: 'scale(0)', opacity: 0 },
                                 { transform: 'scale(1.5)', opacity: 0.7 },
@@ -431,7 +483,7 @@
                         }, 50);
                     }
                     
-                    // Make button slightly smaller sometimes
+                    // Scale effect
                     if (Math.random() > 0.5) {
                         const scale = 0.85 + Math.random() * 0.15;
                         nonBtn.style.transform = `scale(${scale})`;
@@ -441,7 +493,6 @@
             
             // Also escape immediately if mouse enters button
             nonBtn.addEventListener('mouseenter', function(event) {
-                // Trigger immediate escape
                 const fakeEvent = new MouseEvent('mousemove', {
                     clientX: event.clientX,
                     clientY: event.clientY
@@ -449,22 +500,19 @@
                 document.dispatchEvent(fakeEvent);
             });
             
-            // Try to click the button (will be very hard!)
+            // Try to click the button
             nonBtn.addEventListener('mousedown', function(event) {
                 event.preventDefault();
                 
-                // Even on click attempt, move away
                 const fakeEvent = new MouseEvent('mousemove', {
                     clientX: event.clientX + 150,
                     clientY: event.clientY + 150
                 });
                 document.dispatchEvent(fakeEvent);
                 
-                // Show "almost" message
                 message.textContent = "Haha! Presque réussi! 😅";
                 message.style.display = 'block';
                 
-                // Make button jump
                 nonBtn.style.transform = 'translateY(-20px)';
                 setTimeout(() => {
                     nonBtn.style.transform = 'translateY(0)';
@@ -475,28 +523,22 @@
             ouiBtn.addEventListener('click', function() {
                 isCelebrating = true;
                 
-                // Remove all event listeners
                 document.removeEventListener('mousemove', arguments.callee);
                 
-                // Hide buttons
                 ouiBtn.style.display = 'none';
                 nonBtn.style.display = 'none';
                 message.style.display = 'none';
                 
-                // Show celebration
                 celebration.style.display = 'block';
                 
-                // Create massive fast confetti
                 for (let i = 0; i < 100; i++) {
                     setTimeout(() => {
                         createConfetti();
                     }, i * 15);
                 }
                 
-                // Change background
                 document.body.style.background = 'linear-gradient(135deg, #ff9ec0 0%, #a29bfe 50%, #74b9ff 100%)';
                 
-                // Add sparkle effect
                 for (let i = 0; i < 20; i++) {
                     setTimeout(() => {
                         createSparkle();
@@ -517,7 +559,6 @@
                 
                 document.body.appendChild(confetti);
                 
-                // Fast animation
                 const duration = Math.random() * 1000 + 500;
                 
                 confetti.animate([
@@ -558,12 +599,16 @@
             
             // Handle window resize
             window.addEventListener('resize', function() {
+                positionNonButton();
+                
                 const btnRect = nonBtn.getBoundingClientRect();
-                if (btnRect.left < 0 || btnRect.top < 0 || 
-                    btnRect.right > window.innerWidth || btnRect.bottom > window.innerHeight) {
-                    nonBtn.style.left = '50%';
-                    nonBtn.style.top = '50%';
-                    nonBtn.style.transform = 'translate(-50%, -50%)';
+                const cardRect = document.querySelector('.card').getBoundingClientRect();
+                const questionRect = document.querySelector('.question-box').getBoundingClientRect();
+                
+                // If button is over question area, move it
+                if (btnRect.left < questionRect.right && btnRect.right > questionRect.left &&
+                    btnRect.top < questionRect.bottom && btnRect.bottom > questionRect.top) {
+                    positionNonButton();
                 }
             });
             
